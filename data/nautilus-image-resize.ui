@@ -27,6 +27,8 @@
     <property name="margin-bottom">12</property>
     <property name="margin-start">12</property>
     <property name="margin-end">12</property>
+    <property name="use-header-bar">1</property>
+    <property name="resizable">False</property>
     <property name="title" translatable="1">Resize Images</property>
     <child internal-child="content_area">
       <object class="GtkBox" id="dialog-vbox1">
@@ -246,23 +248,19 @@
       </object>
     </child>
     <action-widgets>
-      <action-widget response="cancel">cancelbutton1</action-widget>
-      <action-widget response="ok">okbutton1</action-widget>
+      <action-widget response="cancel">cancel_button</action-widget>
+      <action-widget response="ok" default="true">ok_button</action-widget>
     </action-widgets>
-    <child internal-child="action_area">
-      <object class="GtkBox" id="dialog-action_area1">
-        <child>
-          <object class="GtkButton" id="cancelbutton1">
-            <property name="label" translatable="yes">_Cancel</property>
-            <property name="use_underline">1</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkButton" id="okbutton1">
-            <property name="label" translatable="1">_Resize</property>
-            <property name="use_underline">1</property>
-          </object>
-        </child>
+    <child type="action">
+      <object class="GtkButton" id="cancel_button">
+        <property name="label" translatable="yes">_Cancel</property>
+        <property name="use_underline">1</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="ok_button">
+        <property name="label" translatable="yes">_Resize</property>
+        <property name="use_underline">1</property>
       </object>
     </child>
   </object>
