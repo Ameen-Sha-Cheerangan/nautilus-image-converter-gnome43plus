@@ -384,8 +384,6 @@ nautilus_image_resizer_init(NautilusImageResizer *resizer)
 	priv->name_entry = GTK_ENTRY (gtk_builder_get_object (ui, "name_entry"));
 	priv->inplace_radiobutton = GTK_CHECK_BUTTON (gtk_builder_get_object (ui, "inplace_radiobutton"));
 
-	/* Set default item in combo box */
-	/* gtk_combo_box_set_active  (priv->size_combobox, 4);  1024x768 */
 	priv->progress_dialog = gtk_window_new ();
 	gtk_window_set_title (GTK_WINDOW (priv->progress_dialog), _("Resizing…"));
 	progress_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
