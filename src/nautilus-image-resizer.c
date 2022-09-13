@@ -336,6 +336,7 @@ nautilus_image_resizer_response_cb (GtkDialog *dialog, gint response_id, gpointe
 			priv->size = g_strdup_printf ("%dx%d", (int) gtk_spin_button_get_value (priv->width_spinbutton), (int) gtk_spin_button_get_value (priv->height_spinbutton));
 		}
 		
+		gtk_widget_show (priv->progress_dialog);
 		run_op (resizer);
 	}
 
@@ -351,6 +352,7 @@ nautilus_image_resizer_init(NautilusImageResizer *resizer)
 	gchar      *path;
 	guint       result;
 	GError     *err = NULL;
+	GtkWidget *progress_box;
 
 	/* Let's create our gtkbuilder and load the xml file */
 	ui = gtk_builder_new ();
@@ -384,6 +386,14 @@ nautilus_image_resizer_init(NautilusImageResizer *resizer)
 
 	/* Set default item in combo box */
 	/* gtk_combo_box_set_active  (priv->size_combobox, 4);  1024x768 */
+	priv->progress_dialog = gtk_window_new ();
+	gtk_window_set_title (GTK_WINDOW (priv->progress_dialog), _("Resizing…"));
+	progress_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+	gtk_window_set_child (GTK_WINDOW (priv->progress_dialog), progress_box);
+	priv->progress_label = gtk_label_new ("");
+	priv->progress_bar = gtk_progress_bar_new ();
+	gtk_box_append (GTK_BOX (progress_box), priv->progress_bar);
+	gtk_box_append (GTK_BOX (progress_box), priv->progress_label);
 
 	/* Connect signal */
 	g_signal_connect (G_OBJECT (priv->resize_dialog), "response",

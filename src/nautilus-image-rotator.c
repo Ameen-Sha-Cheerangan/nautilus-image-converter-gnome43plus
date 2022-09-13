@@ -347,6 +347,7 @@ nautilus_image_rotator_response_cb (GtkDialog *dialog, gint response_id, gpointe
 			g_assert_not_reached ();
 		}
 		
+		gtk_widget_show (priv->progress_dialog);
 		run_op (rotator);
 	}
 
@@ -362,6 +363,7 @@ nautilus_image_rotator_init(NautilusImageRotator *rotator)
 	gchar      *path;
 	guint       result;
 	GError     *err = NULL;
+	GtkWidget *progress_box;
 
 	/* Let's create our gtkbuilder and load the xml file */
 	ui = gtk_builder_new ();
@@ -394,6 +396,15 @@ nautilus_image_rotator_init(NautilusImageRotator *rotator)
 
 	/* Set default value for combobox */
 	gtk_combo_box_set_active  (priv->angle_combobox, 0); /* 90° clockwise */
+
+	priv->progress_dialog = gtk_window_new ();
+	gtk_window_set_title (GTK_WINDOW (priv->progress_dialog), _("Rotating…"));
+	progress_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+	gtk_window_set_child (GTK_WINDOW (priv->progress_dialog), progress_box);
+	priv->progress_label = gtk_label_new ("");
+	priv->progress_bar = gtk_progress_bar_new ();
+	gtk_box_append (GTK_BOX (progress_box), priv->progress_bar);
+	gtk_box_append (GTK_BOX (progress_box), priv->progress_label);
 
 	/* Connect the signal */
 	g_signal_connect (G_OBJECT (priv->rotate_dialog), "response",
