@@ -65,7 +65,7 @@ struct _NautilusImageResizerPrivate {
 
 #define NAUTILUS_IMAGE_RESIZER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NAUTILUS_TYPE_IMAGE_RESIZER, NautilusImageResizerPrivate))
 
-G_DEFINE_TYPE (NautilusImageResizer, nautilus_image_resizer, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (NautilusImageResizer, nautilus_image_resizer, G_TYPE_OBJECT)
 
 enum {
 	PROP_FILES = 1,
@@ -81,7 +81,7 @@ static void
 nautilus_image_resizer_finalize(GObject *object)
 {
 	NautilusImageResizer *dialog = NAUTILUS_IMAGE_RESIZER (object);
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (dialog);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (dialog);
 	
 	g_free (priv->suffix);
 		
@@ -95,7 +95,7 @@ nautilus_image_resizer_set_property (GObject      *object,
                         GParamSpec   *pspec)
 {
 	NautilusImageResizer *dialog = NAUTILUS_IMAGE_RESIZER (object);
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (dialog);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (dialog);
 
 	switch (property_id) {
 	case PROP_FILES:
@@ -116,7 +116,7 @@ nautilus_image_resizer_get_property (GObject      *object,
                         GParamSpec   *pspec)
 {
 	NautilusImageResizer *self = NAUTILUS_IMAGE_RESIZER (object);
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (self);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (self);
 
 	switch (property_id) {
 	case PROP_FILES:
@@ -132,8 +132,6 @@ nautilus_image_resizer_get_property (GObject      *object,
 static void
 nautilus_image_resizer_class_init(NautilusImageResizerClass *klass)
 {
-	g_type_class_add_private (klass, sizeof (NautilusImageResizerPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	GParamSpec *files_param_spec;
 
@@ -156,7 +154,7 @@ static void run_op (NautilusImageResizer *resizer);
 static GFile *
 nautilus_image_resizer_transform_filename (NautilusImageResizer *resizer, GFile *orig_file)
 {
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (resizer);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (resizer);
 
 	GFile *parent_file, *new_file;
 	char *basename, *extension, *new_basename;
@@ -189,9 +187,9 @@ static void
 op_finished (GPid pid, gint status, gpointer data)
 {
 	NautilusImageResizer *resizer = NAUTILUS_IMAGE_RESIZER (data);
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (resizer);
 	
 	gboolean retry = TRUE;
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (resizer);
 	
 	NautilusFileInfo *file = NAUTILUS_FILE_INFO (priv->files->data);
 	
@@ -249,7 +247,7 @@ op_finished (GPid pid, gint status, gpointer data)
 static void
 run_op (NautilusImageResizer *resizer)
 {
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (resizer);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (resizer);
 	
 	g_return_if_fail (priv->files != NULL);
 	
@@ -303,7 +301,7 @@ static void
 nautilus_image_resizer_response_cb (GtkDialog *dialog, gint response_id, gpointer user_data)
 {
 	NautilusImageResizer *resizer = NAUTILUS_IMAGE_RESIZER (user_data);
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (resizer);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (resizer);
 
 	if (response_id == GTK_RESPONSE_OK) {
 		if (gtk_check_button_get_active (priv->append_radiobutton)) {
@@ -335,7 +333,7 @@ nautilus_image_resizer_response_cb (GtkDialog *dialog, gint response_id, gpointe
 static void
 nautilus_image_resizer_init(NautilusImageResizer *resizer)
 {
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (resizer);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (resizer);
 
 	GtkBuilder *ui;
 	gchar      *path;
@@ -390,7 +388,7 @@ nautilus_image_resizer_new (GList *files)
 void
 nautilus_image_resizer_show_dialog (NautilusImageResizer *resizer)
 {
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (resizer);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (resizer);
 
 	gtk_widget_show (GTK_WIDGET (priv->resize_dialog));
 }

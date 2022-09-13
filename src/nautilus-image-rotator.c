@@ -63,7 +63,7 @@ struct _NautilusImageRotatorPrivate {
 
 #define NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NAUTILUS_TYPE_IMAGE_ROTATOR, NautilusImageRotatorPrivate))
 
-G_DEFINE_TYPE (NautilusImageRotator, nautilus_image_rotator, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (NautilusImageRotator, nautilus_image_rotator, G_TYPE_OBJECT)
 
 enum {
 	PROP_FILES = 1,
@@ -79,7 +79,7 @@ static void
 nautilus_image_rotator_finalize(GObject *object)
 {
 	NautilusImageRotator *dialog = NAUTILUS_IMAGE_ROTATOR (object);
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (dialog);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (dialog);
 	
 	g_free (priv->suffix);
 		
@@ -93,7 +93,7 @@ nautilus_image_rotator_set_property (GObject      *object,
                         GParamSpec   *pspec)
 {
 	NautilusImageRotator *dialog = NAUTILUS_IMAGE_ROTATOR (object);
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (dialog);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (dialog);
 
 	switch (property_id) {
 	case PROP_FILES:
@@ -114,7 +114,7 @@ nautilus_image_rotator_get_property (GObject      *object,
                         GParamSpec   *pspec)
 {
 	NautilusImageRotator *self = NAUTILUS_IMAGE_ROTATOR (object);
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (self);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (self);
 
 	switch (property_id) {
 	case PROP_FILES:
@@ -130,8 +130,6 @@ nautilus_image_rotator_get_property (GObject      *object,
 static void
 nautilus_image_rotator_class_init(NautilusImageRotatorClass *klass)
 {
-	g_type_class_add_private (klass, sizeof (NautilusImageRotatorPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	GParamSpec *files_param_spec;
 
@@ -154,7 +152,7 @@ static void run_op (NautilusImageRotator *rotator);
 static GFile *
 nautilus_image_rotator_transform_filename (NautilusImageRotator *rotator, GFile *orig_file)
 {
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (rotator);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
 
 	GFile *parent_file, *new_file;
 	char *basename, *extension, *new_basename;
@@ -187,9 +185,9 @@ static void
 op_finished (GPid pid, gint status, gpointer data)
 {
 	NautilusImageRotator *rotator = NAUTILUS_IMAGE_ROTATOR (data);
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (rotator);
 	
 	gboolean retry = TRUE;
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
 	
 	NautilusFileInfo *file = NAUTILUS_FILE_INFO (priv->files->data);
 	
@@ -247,7 +245,7 @@ op_finished (GPid pid, gint status, gpointer data)
 static void
 run_op (NautilusImageRotator *rotator)
 {
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (rotator);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
 	
 	g_return_if_fail (priv->files != NULL);
 	
@@ -303,7 +301,7 @@ static void
 nautilus_image_rotator_response_cb (GtkDialog *dialog, gint response_id, gpointer user_data)
 {
 	NautilusImageRotator *rotator = NAUTILUS_IMAGE_ROTATOR (user_data);
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (rotator);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
 
 	if (response_id == GTK_RESPONSE_OK) {
 		if (gtk_check_button_get_active (priv->append_radiobutton)) {
@@ -347,7 +345,7 @@ nautilus_image_rotator_response_cb (GtkDialog *dialog, gint response_id, gpointe
 static void
 nautilus_image_rotator_init(NautilusImageRotator *rotator)
 {
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (rotator);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
 
 	GtkBuilder *ui;
 	gchar      *path;
@@ -401,7 +399,7 @@ nautilus_image_rotator_new (GList *files)
 void
 nautilus_image_rotator_show_dialog (NautilusImageRotator *rotator)
 {
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (rotator);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
 
 	gtk_widget_show (GTK_WIDGET (priv->rotate_dialog));
 }
