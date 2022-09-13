@@ -21,9 +21,8 @@
  * 
  */
 
-#ifdef HAVE_CONFIG_H
- #include <config.h> /* for GETTEXT_PACKAGE */
-#endif
+#include <config.h> /* for GETTEXT_PACKAGE */
+
 
 #include "nautilus-image-rotator.h"
 
@@ -33,7 +32,7 @@
 #include <gio/gio.h>
 #include <gtk/gtk.h>
 
-#include <libnautilus-extension/nautilus-file-info.h>
+#include <nautilus-extension.h>
  
 typedef struct _NautilusImageRotatorPrivate NautilusImageRotatorPrivate;
 
@@ -44,18 +43,17 @@ struct _NautilusImageRotatorPrivate {
 	
 	int images_rotated;
 	int images_total;
-	gboolean cancelled;
 	
 	gchar *angle;
 
 	GtkDialog *rotate_dialog;
-	GtkRadioButton *default_angle_radiobutton;
+	GtkCheckButton *default_angle_radiobutton;
 	GtkComboBox *angle_combobox;
-	GtkRadioButton *custom_angle_radiobutton;
+	GtkCheckButton *custom_angle_radiobutton;
 	GtkSpinButton *angle_spinbutton;
-	GtkRadioButton *append_radiobutton;
+	GtkCheckButton *append_radiobutton;
 	GtkEntry *name_entry;
-	GtkRadioButton *inplace_radiobutton;
+	GtkCheckButton *inplace_radiobutton;
 
 	GtkWidget *progress_dialog;
 	GtkWidget *progress_bar;
@@ -64,7 +62,7 @@ struct _NautilusImageRotatorPrivate {
 
 #define NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NAUTILUS_TYPE_IMAGE_ROTATOR, NautilusImageRotatorPrivate))
 
-G_DEFINE_TYPE (NautilusImageRotator, nautilus_image_rotator, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (NautilusImageRotator, nautilus_image_rotator, G_TYPE_OBJECT)
 
 enum {
 	PROP_FILES = 1,
@@ -80,7 +78,7 @@ static void
 nautilus_image_rotator_finalize(GObject *object)
 {
 	NautilusImageRotator *dialog = NAUTILUS_IMAGE_ROTATOR (object);
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (dialog);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (dialog);
 	
 	g_free (priv->suffix);
 		
@@ -94,7 +92,7 @@ nautilus_image_rotator_set_property (GObject      *object,
                         GParamSpec   *pspec)
 {
 	NautilusImageRotator *dialog = NAUTILUS_IMAGE_ROTATOR (object);
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (dialog);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (dialog);
 
 	switch (property_id) {
 	case PROP_FILES:
@@ -115,7 +113,7 @@ nautilus_image_rotator_get_property (GObject      *object,
                         GParamSpec   *pspec)
 {
 	NautilusImageRotator *self = NAUTILUS_IMAGE_ROTATOR (object);
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (self);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (self);
 
 	switch (property_id) {
 	case PROP_FILES:
@@ -131,8 +129,6 @@ nautilus_image_rotator_get_property (GObject      *object,
 static void
 nautilus_image_rotator_class_init(NautilusImageRotatorClass *klass)
 {
-	g_type_class_add_private (klass, sizeof (NautilusImageRotatorPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	GParamSpec *files_param_spec;
 
@@ -155,7 +151,7 @@ static void run_op (NautilusImageRotator *rotator);
 static GFile *
 nautilus_image_rotator_transform_filename (NautilusImageRotator *rotator, GFile *orig_file)
 {
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (rotator);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
 
 	GFile *parent_file, *new_file;
 	char *basename, *extension, *new_basename;
@@ -185,19 +181,42 @@ nautilus_image_rotator_transform_filename (NautilusImageRotator *rotator, GFile 
 }
 
 static void
+retry_dialog_cb (GtkDialog *dialog,
+                 gint       response_id,
+                 gpointer   user_data)
+{
+	NautilusImageRotator *rotator = NAUTILUS_IMAGE_ROTATOR (user_data);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
+
+	gtk_window_destroy (GTK_WINDOW (dialog));
+	if (response_id == GTK_RESPONSE_CANCEL) {
+		gtk_window_destroy (GTK_WINDOW (priv->progress_dialog));
+		return;
+	} else if (response_id == 1) {
+		priv->images_rotated++;
+		priv->files = priv->files->next;
+	}
+
+	if (priv->files != NULL) {
+		/* process next image */
+		run_op (rotator);
+	} else {
+		/* cancel/terminate operation */
+		gtk_window_destroy (GTK_WINDOW (priv->progress_dialog));
+	}
+}
+
+static void
 op_finished (GPid pid, gint status, gpointer data)
 {
 	NautilusImageRotator *rotator = NAUTILUS_IMAGE_ROTATOR (data);
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (rotator);
-	
-	gboolean retry = TRUE;
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
 	
 	NautilusFileInfo *file = NAUTILUS_FILE_INFO (priv->files->data);
 	
 	if (status != 0) {
 		/* rotating failed */
 		char *name = nautilus_file_info_get_name (file);
-
 		GtkWidget *msg_dialog = gtk_message_dialog_new (GTK_WINDOW (priv->progress_dialog),
 			GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR,
 			GTK_BUTTONS_NONE,
@@ -206,20 +225,13 @@ op_finished (GPid pid, gint status, gpointer data)
 		g_free (name);
 		
 		gtk_dialog_add_button (GTK_DIALOG (msg_dialog), _("_Skip"), 1);
-		gtk_dialog_add_button (GTK_DIALOG (msg_dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+		gtk_dialog_add_button (GTK_DIALOG (msg_dialog), _("_Cancel"), GTK_RESPONSE_CANCEL);
 		gtk_dialog_add_button (GTK_DIALOG (msg_dialog), _("_Retry"), 0);
 		gtk_dialog_set_default_response (GTK_DIALOG (msg_dialog), 0);
 		
-		int response_id = gtk_dialog_run (GTK_DIALOG (msg_dialog));
-		gtk_widget_destroy (msg_dialog);
-		if (response_id == 0) {
-			retry = TRUE;
-		} else if (response_id == GTK_RESPONSE_CANCEL) {
-			priv->cancelled = TRUE;
-		} else if (response_id == 1) {
-			retry = FALSE;
-		}
-		
+		g_signal_connect (msg_dialog, "response", G_CALLBACK (retry_dialog_cb), data);
+		gtk_widget_show (msg_dialog);
+		return;
 	} else if (priv->suffix == NULL) {
 		/* rotate image in place */
 		GFile *orig_location = nautilus_file_info_get_location (file);
@@ -229,25 +241,22 @@ op_finished (GPid pid, gint status, gpointer data)
 		g_object_unref (new_location);
 	}
 
-	if (status == 0 || !retry) {
-		/* image has been successfully rotated (or skipped) */
-		priv->images_rotated++;
-		priv->files = priv->files->next;
-	}
+	priv->images_rotated++;
+	priv->files = priv->files->next;
 	
-	if (!priv->cancelled && priv->files != NULL) {
+	if (priv->files != NULL) {
 		/* process next image */
 		run_op (rotator);
 	} else {
 		/* cancel/terminate operation */
-		gtk_widget_destroy (priv->progress_dialog);
+		gtk_window_destroy (GTK_WINDOW (priv->progress_dialog));
 	}
 }
 
 static void
 run_op (NautilusImageRotator *rotator)
 {
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (rotator);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
 	
 	g_return_if_fail (priv->files != NULL);
 	
@@ -303,21 +312,22 @@ static void
 nautilus_image_rotator_response_cb (GtkDialog *dialog, gint response_id, gpointer user_data)
 {
 	NautilusImageRotator *rotator = NAUTILUS_IMAGE_ROTATOR (user_data);
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (rotator);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
 
 	if (response_id == GTK_RESPONSE_OK) {
-		if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->append_radiobutton))) {
-			if (strlen (gtk_entry_get_text (priv->name_entry)) == 0) {
+		if (gtk_check_button_get_active (priv->append_radiobutton)) {
+			if (strlen (gtk_editable_get_text (GTK_EDITABLE (priv->name_entry))) == 0) {
 				GtkWidget *msg_dialog = gtk_message_dialog_new (GTK_WINDOW (dialog),
-					GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR,
+					GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR,
 					GTK_BUTTONS_OK, _("Please enter a valid filename suffix!"));
-				gtk_dialog_run (GTK_DIALOG (msg_dialog));
-				gtk_widget_destroy (msg_dialog);
+        gtk_window_set_transient_for (GTK_WINDOW (msg_dialog), GTK_WINDOW (priv->rotate_dialog));
+        g_signal_connect (msg_dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+				gtk_widget_show (GTK_WIDGET (msg_dialog));
 				return;
 			}
-			priv->suffix = g_strdup (gtk_entry_get_text (priv->name_entry));
+			priv->suffix = g_strdup (gtk_editable_get_text (GTK_EDITABLE (priv->name_entry)));
 		}
-		if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->default_angle_radiobutton))) {
+		if (gtk_check_button_get_active (priv->default_angle_radiobutton)) {
 			switch (gtk_combo_box_get_active (GTK_COMBO_BOX (priv->angle_combobox))) {
 			case 0:
 				priv->angle = g_strdup_printf ("90");
@@ -331,27 +341,29 @@ nautilus_image_rotator_response_cb (GtkDialog *dialog, gint response_id, gpointe
 			default:
 				g_assert_not_reached ();
 			}
-		} else if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->custom_angle_radiobutton))) {
+		} else if (gtk_check_button_get_active (priv->custom_angle_radiobutton)) {
 			priv->angle = g_strdup_printf ("%d", (int) gtk_spin_button_get_value (priv->angle_spinbutton));
 		} else {
 			g_assert_not_reached ();
 		}
 		
+		gtk_widget_show (priv->progress_dialog);
 		run_op (rotator);
 	}
 
-	gtk_widget_destroy (GTK_WIDGET (dialog));
+	gtk_window_destroy (GTK_WINDOW (dialog));
 }
 
 static void
 nautilus_image_rotator_init(NautilusImageRotator *rotator)
 {
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (rotator);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
 
 	GtkBuilder *ui;
 	gchar      *path;
 	guint       result;
 	GError     *err = NULL;
+	GtkWidget *progress_box;
 
 	/* Let's create our gtkbuilder and load the xml file */
 	ui = gtk_builder_new ();
@@ -370,20 +382,29 @@ nautilus_image_rotator_init(NautilusImageRotator *rotator)
 	/* Grab some widgets */
 	priv->rotate_dialog = GTK_DIALOG (gtk_builder_get_object (ui, "rotate_dialog"));
 	priv->default_angle_radiobutton =
-		GTK_RADIO_BUTTON (gtk_builder_get_object (ui, "default_angle_radiobutton"));
+		GTK_CHECK_BUTTON (gtk_builder_get_object (ui, "default_angle_radiobutton"));
 	priv->angle_combobox = GTK_COMBO_BOX (gtk_builder_get_object (ui, "angle_combobox"));
 	priv->custom_angle_radiobutton =
-		GTK_RADIO_BUTTON (gtk_builder_get_object (ui, "custom_angle_radiobutton"));
+		GTK_CHECK_BUTTON (gtk_builder_get_object (ui, "custom_angle_radiobutton"));
 	priv->angle_spinbutton =
 		GTK_SPIN_BUTTON (gtk_builder_get_object (ui, "angle_spinbutton"));
 	priv->append_radiobutton =
-		GTK_RADIO_BUTTON (gtk_builder_get_object (ui, "append_radiobutton"));
+		GTK_CHECK_BUTTON (gtk_builder_get_object (ui, "append_radiobutton"));
 	priv->name_entry = GTK_ENTRY (gtk_builder_get_object (ui, "name_entry"));
 	priv->inplace_radiobutton =
-		GTK_RADIO_BUTTON (gtk_builder_get_object (ui, "inplace_radiobutton"));
+		GTK_CHECK_BUTTON (gtk_builder_get_object (ui, "inplace_radiobutton"));
 
 	/* Set default value for combobox */
 	gtk_combo_box_set_active  (priv->angle_combobox, 0); /* 90° clockwise */
+
+	priv->progress_dialog = gtk_window_new ();
+	gtk_window_set_title (GTK_WINDOW (priv->progress_dialog), _("Rotating…"));
+	progress_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+	gtk_window_set_child (GTK_WINDOW (priv->progress_dialog), progress_box);
+	priv->progress_label = gtk_label_new ("");
+	priv->progress_bar = gtk_progress_bar_new ();
+	gtk_box_append (GTK_BOX (progress_box), priv->progress_bar);
+	gtk_box_append (GTK_BOX (progress_box), priv->progress_label);
 
 	/* Connect the signal */
 	g_signal_connect (G_OBJECT (priv->rotate_dialog), "response",
@@ -400,7 +421,7 @@ nautilus_image_rotator_new (GList *files)
 void
 nautilus_image_rotator_show_dialog (NautilusImageRotator *rotator)
 {
-	NautilusImageRotatorPrivate *priv = NAUTILUS_IMAGE_ROTATOR_GET_PRIVATE (rotator);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
 
 	gtk_widget_show (GTK_WIDGET (priv->rotate_dialog));
 }

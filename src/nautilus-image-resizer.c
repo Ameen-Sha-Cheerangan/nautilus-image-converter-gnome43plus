@@ -21,9 +21,7 @@
  * 
  */
 
-#ifdef HAVE_CONFIG_H
- #include <config.h> /* for GETTEXT_PACKAGE */
-#endif
+#include <config.h> /* for GETTEXT_PACKAGE */
 
 #include "nautilus-image-resizer.h"
 
@@ -33,7 +31,7 @@
 #include <gio/gio.h>
 #include <gtk/gtk.h>
 
-#include <libnautilus-extension/nautilus-file-info.h>
+#include <nautilus-extension.h>
  
 typedef struct _NautilusImageResizerPrivate NautilusImageResizerPrivate;
 
@@ -44,21 +42,20 @@ struct _NautilusImageResizerPrivate {
 	
 	int images_resized;
 	int images_total;
-	gboolean cancelled;
 	
 	gchar *size;
 
 	GtkDialog *resize_dialog;
-	GtkRadioButton *default_size_radiobutton;
+	GtkCheckButton *default_size_radiobutton;
 	GtkComboBoxText *size_combobox;
-	GtkRadioButton *custom_pct_radiobutton;
+	GtkCheckButton *custom_pct_radiobutton;
 	GtkSpinButton *pct_spinbutton;
-	GtkRadioButton *custom_size_radiobutton;
+	GtkCheckButton *custom_size_radiobutton;
 	GtkSpinButton *width_spinbutton;
 	GtkSpinButton *height_spinbutton;
-	GtkRadioButton *append_radiobutton;
+	GtkCheckButton *append_radiobutton;
 	GtkEntry *name_entry;
-	GtkRadioButton *inplace_radiobutton;
+	GtkCheckButton *inplace_radiobutton;
 
 	GtkWidget *progress_dialog;
 	GtkWidget *progress_bar;
@@ -67,7 +64,7 @@ struct _NautilusImageResizerPrivate {
 
 #define NAUTILUS_IMAGE_RESIZER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), NAUTILUS_TYPE_IMAGE_RESIZER, NautilusImageResizerPrivate))
 
-G_DEFINE_TYPE (NautilusImageResizer, nautilus_image_resizer, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (NautilusImageResizer, nautilus_image_resizer, G_TYPE_OBJECT)
 
 enum {
 	PROP_FILES = 1,
@@ -83,7 +80,7 @@ static void
 nautilus_image_resizer_finalize(GObject *object)
 {
 	NautilusImageResizer *dialog = NAUTILUS_IMAGE_RESIZER (object);
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (dialog);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (dialog);
 	
 	g_free (priv->suffix);
 		
@@ -97,7 +94,7 @@ nautilus_image_resizer_set_property (GObject      *object,
                         GParamSpec   *pspec)
 {
 	NautilusImageResizer *dialog = NAUTILUS_IMAGE_RESIZER (object);
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (dialog);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (dialog);
 
 	switch (property_id) {
 	case PROP_FILES:
@@ -118,7 +115,7 @@ nautilus_image_resizer_get_property (GObject      *object,
                         GParamSpec   *pspec)
 {
 	NautilusImageResizer *self = NAUTILUS_IMAGE_RESIZER (object);
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (self);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (self);
 
 	switch (property_id) {
 	case PROP_FILES:
@@ -134,8 +131,6 @@ nautilus_image_resizer_get_property (GObject      *object,
 static void
 nautilus_image_resizer_class_init(NautilusImageResizerClass *klass)
 {
-	g_type_class_add_private (klass, sizeof (NautilusImageResizerPrivate));
-
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	GParamSpec *files_param_spec;
 
@@ -158,7 +153,7 @@ static void run_op (NautilusImageResizer *resizer);
 static GFile *
 nautilus_image_resizer_transform_filename (NautilusImageResizer *resizer, GFile *orig_file)
 {
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (resizer);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (resizer);
 
 	GFile *parent_file, *new_file;
 	char *basename, *extension, *new_basename;
@@ -188,19 +183,43 @@ nautilus_image_resizer_transform_filename (NautilusImageResizer *resizer, GFile 
 }
 
 static void
+retry_dialog_cb (GtkDialog *dialog,
+                 gint       response_id,
+                 gpointer   user_data)
+{
+	NautilusImageResizer *resizer = NAUTILUS_IMAGE_RESIZER (user_data);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (resizer);
+
+	gtk_window_destroy (GTK_WINDOW (dialog));
+
+	if (response_id == GTK_RESPONSE_CANCEL) {
+		gtk_window_destroy (GTK_WINDOW (priv->progress_dialog));
+		return;
+	} else if (response_id == 1) {
+		priv->images_resized++;
+		priv->files = priv->files->next;
+	}
+
+	if (priv->files != NULL) {
+		/* process next image */
+		run_op (resizer);
+	} else {
+		/* cancel/terminate operation */
+		gtk_window_destroy (GTK_WINDOW (priv->progress_dialog));
+	}
+}
+
+static void
 op_finished (GPid pid, gint status, gpointer data)
 {
 	NautilusImageResizer *resizer = NAUTILUS_IMAGE_RESIZER (data);
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (resizer);
-	
-	gboolean retry = TRUE;
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (resizer);
 	
 	NautilusFileInfo *file = NAUTILUS_FILE_INFO (priv->files->data);
 	
 	if (status != 0) {
 		/* resizing failed */
 		char *name = nautilus_file_info_get_name (file);
-
 		GtkWidget *msg_dialog = gtk_message_dialog_new (GTK_WINDOW (priv->progress_dialog),
 			GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR,
 			GTK_BUTTONS_NONE,
@@ -209,20 +228,13 @@ op_finished (GPid pid, gint status, gpointer data)
 		g_free (name);
 		
 		gtk_dialog_add_button (GTK_DIALOG (msg_dialog), _("_Skip"), 1);
-		gtk_dialog_add_button (GTK_DIALOG (msg_dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+		gtk_dialog_add_button (GTK_DIALOG (msg_dialog), _("_Cancel"), GTK_RESPONSE_CANCEL);
 		gtk_dialog_add_button (GTK_DIALOG (msg_dialog), _("_Retry"), 0);
 		gtk_dialog_set_default_response (GTK_DIALOG (msg_dialog), 0);
 		
-		int response_id = gtk_dialog_run (GTK_DIALOG (msg_dialog));
-		gtk_widget_destroy (msg_dialog);
-		if (response_id == 0) {
-			retry = TRUE;
-		} else if (response_id == GTK_RESPONSE_CANCEL) {
-			priv->cancelled = TRUE;
-		} else if (response_id == 1) {
-			retry = FALSE;
-		}
-		
+		g_signal_connect (msg_dialog, "response", G_CALLBACK (retry_dialog_cb), data);
+		gtk_widget_show (msg_dialog);
+		return;
 	} else if (priv->suffix == NULL) {
 		/* resize image in place */
 		GFile *orig_location = nautilus_file_info_get_location (file);
@@ -232,25 +244,22 @@ op_finished (GPid pid, gint status, gpointer data)
 		g_object_unref (new_location);
 	}
 
-	if (status == 0 || !retry) {
-		/* image has been successfully resized (or skipped) */
-		priv->images_resized++;
-		priv->files = priv->files->next;
-	}
+	priv->images_resized++;
+	priv->files = priv->files->next;
 	
-	if (!priv->cancelled && priv->files != NULL) {
+	if (priv->files != NULL) {
 		/* process next image */
 		run_op (resizer);
 	} else {
 		/* cancel/terminate operation */
-		gtk_widget_destroy (priv->progress_dialog);
+		gtk_window_destroy (GTK_WINDOW (priv->progress_dialog));
 	}
 }
 
 static void
 run_op (NautilusImageResizer *resizer)
 {
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (resizer);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (resizer);
 	
 	g_return_if_fail (priv->files != NULL);
 	
@@ -304,43 +313,46 @@ static void
 nautilus_image_resizer_response_cb (GtkDialog *dialog, gint response_id, gpointer user_data)
 {
 	NautilusImageResizer *resizer = NAUTILUS_IMAGE_RESIZER (user_data);
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (resizer);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (resizer);
 
 	if (response_id == GTK_RESPONSE_OK) {
-		if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->append_radiobutton))) {
-			if (strlen (gtk_entry_get_text (priv->name_entry)) == 0) {
+		if (gtk_check_button_get_active (priv->append_radiobutton)) {
+			if (strlen (gtk_editable_get_text (GTK_EDITABLE (priv->name_entry))) == 0) {
 				GtkWidget *msg_dialog = gtk_message_dialog_new (GTK_WINDOW (dialog),
-					GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR,
+					GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR,
 					GTK_BUTTONS_OK, _("Please enter a valid filename suffix!"));
-				gtk_dialog_run (GTK_DIALOG (msg_dialog));
-				gtk_widget_destroy (msg_dialog);
+        gtk_window_set_transient_for (GTK_WINDOW (msg_dialog), GTK_WINDOW (priv->resize_dialog));
+        g_signal_connect (msg_dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+				gtk_widget_show (msg_dialog);
 				return;
 			}
-			priv->suffix = g_strdup (gtk_entry_get_text (priv->name_entry));
+			priv->suffix = g_strdup (gtk_editable_get_text (GTK_EDITABLE (priv->name_entry)));
 		}
-		if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->default_size_radiobutton))) {
+		if (gtk_check_button_get_active (priv->default_size_radiobutton)) {
 			priv->size = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT (priv->size_combobox));
-		} else if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->custom_pct_radiobutton))) {
+		} else if (gtk_check_button_get_active (priv->custom_pct_radiobutton)) {
 			priv->size = g_strdup_printf ("%d%%", (int) gtk_spin_button_get_value (priv->pct_spinbutton));
 		} else {
 			priv->size = g_strdup_printf ("%dx%d", (int) gtk_spin_button_get_value (priv->width_spinbutton), (int) gtk_spin_button_get_value (priv->height_spinbutton));
 		}
 		
+		gtk_widget_show (priv->progress_dialog);
 		run_op (resizer);
 	}
 
-	gtk_widget_destroy (GTK_WIDGET (dialog));
+	gtk_window_destroy (GTK_WINDOW (dialog));
 }
 
 static void
 nautilus_image_resizer_init(NautilusImageResizer *resizer)
 {
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (resizer);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (resizer);
 
 	GtkBuilder *ui;
 	gchar      *path;
 	guint       result;
 	GError     *err = NULL;
+	GtkWidget *progress_box;
 
 	/* Let's create our gtkbuilder and load the xml file */
 	ui = gtk_builder_new ();
@@ -359,21 +371,27 @@ nautilus_image_resizer_init(NautilusImageResizer *resizer)
 	/* Grab some widgets */
 	priv->resize_dialog = GTK_DIALOG (gtk_builder_get_object (ui, "resize_dialog"));
 	priv->default_size_radiobutton =
-		GTK_RADIO_BUTTON (gtk_builder_get_object (ui, "default_size_radiobutton"));
+		GTK_CHECK_BUTTON (gtk_builder_get_object (ui, "default_size_radiobutton"));
 	priv->size_combobox = GTK_COMBO_BOX_TEXT (gtk_builder_get_object (ui, "comboboxtext_size"));
 	priv->custom_pct_radiobutton =
-		GTK_RADIO_BUTTON (gtk_builder_get_object (ui, "custom_pct_radiobutton"));
+		GTK_CHECK_BUTTON (gtk_builder_get_object (ui, "custom_pct_radiobutton"));
 	priv->pct_spinbutton = GTK_SPIN_BUTTON (gtk_builder_get_object (ui, "pct_spinbutton"));
 	priv->custom_size_radiobutton =
-		GTK_RADIO_BUTTON (gtk_builder_get_object (ui, "custom_size_radiobutton"));
+		GTK_CHECK_BUTTON (gtk_builder_get_object (ui, "custom_size_radiobutton"));
 	priv->width_spinbutton = GTK_SPIN_BUTTON (gtk_builder_get_object (ui, "width_spinbutton"));
 	priv->height_spinbutton = GTK_SPIN_BUTTON (gtk_builder_get_object (ui, "height_spinbutton"));
-	priv->append_radiobutton = GTK_RADIO_BUTTON (gtk_builder_get_object (ui, "append_radiobutton"));
+	priv->append_radiobutton = GTK_CHECK_BUTTON (gtk_builder_get_object (ui, "append_radiobutton"));
 	priv->name_entry = GTK_ENTRY (gtk_builder_get_object (ui, "name_entry"));
-	priv->inplace_radiobutton = GTK_RADIO_BUTTON (gtk_builder_get_object (ui, "inplace_radiobutton"));
+	priv->inplace_radiobutton = GTK_CHECK_BUTTON (gtk_builder_get_object (ui, "inplace_radiobutton"));
 
-	/* Set default item in combo box */
-	/* gtk_combo_box_set_active  (priv->size_combobox, 4);  1024x768 */
+	priv->progress_dialog = gtk_window_new ();
+	gtk_window_set_title (GTK_WINDOW (priv->progress_dialog), _("Resizing…"));
+	progress_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+	gtk_window_set_child (GTK_WINDOW (priv->progress_dialog), progress_box);
+	priv->progress_label = gtk_label_new ("");
+	priv->progress_bar = gtk_progress_bar_new ();
+	gtk_box_append (GTK_BOX (progress_box), priv->progress_bar);
+	gtk_box_append (GTK_BOX (progress_box), priv->progress_label);
 
 	/* Connect signal */
 	g_signal_connect (G_OBJECT (priv->resize_dialog), "response",
@@ -390,7 +408,7 @@ nautilus_image_resizer_new (GList *files)
 void
 nautilus_image_resizer_show_dialog (NautilusImageResizer *resizer)
 {
-	NautilusImageResizerPrivate *priv = NAUTILUS_IMAGE_RESIZER_GET_PRIVATE (resizer);
+	NautilusImageResizerPrivate *priv = nautilus_image_resizer_get_instance_private (resizer);
 
 	gtk_widget_show (GTK_WIDGET (priv->resize_dialog));
 }
