@@ -21,9 +21,7 @@
  * 
  */
 
-#ifdef HAVE_CONFIG_H
- #include <config.h> /* for GETTEXT_PACKAGE */
-#endif
+#include <config.h> /* for GETTEXT_PACKAGE */
 
 #include "nautilus-image-resizer.h"
 
