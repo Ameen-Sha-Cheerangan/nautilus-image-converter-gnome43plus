@@ -1,3 +1,11 @@
+2022-09-13 Corey Berla <corey@berla.me>
+
+        * Port to GTK4
+        * Port to libnautilus-extension-4
+        * Port to Meson
+        * Fix progress window
+        * Misc ui cleanup
+
 2008-09-25  Jürg Billeter  <j@bitron.ch>
 
 	* po/LINGUAS, po/ca.po: Added Catalan translation by
