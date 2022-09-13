@@ -78,8 +78,6 @@
                         <child>
                           <object class="GtkComboBoxText" id="comboboxtext_size">
                             <property name="hexpand">1</property>
-                            <property name="has_entry">1</property>
-                            <property name="entry_text_column">0</property>
                             <items>
                               <item translatable="yes">96x96</item>
                               <item translatable="yes">128x128</item>
@@ -88,12 +86,6 @@
                               <item translatable="yes">1024x768</item>
                               <item translatable="yes">1280x960</item>
                             </items>
-                            <property name="child">
-                              <object class="GtkEntry" id="comboboxentry-entry">
-                                <property name="visible">0</property>
-                                <property name="editable">0</property>
-                              </object>
-                            </property>
                           </object>
                         </child>
                         <child>
@@ -221,6 +213,7 @@
                           <object class="GtkEntry" id="name_entry">
                             <property name="hexpand">1</property>
                             <property name="text" translatable="true">.resized</property>
+		            <property name="activates-default">true</property>
                           </object>
                         </child>
                         <child>
