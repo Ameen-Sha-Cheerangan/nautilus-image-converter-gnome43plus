@@ -31,7 +31,7 @@
 #include <gio/gio.h>
 #include <gtk/gtk.h>
 
-#include <libnautilus-extension/nautilus-file-info.h>
+#include <nautilus-extension.h>
  
 typedef struct _NautilusImageResizerPrivate NautilusImageResizerPrivate;
 
