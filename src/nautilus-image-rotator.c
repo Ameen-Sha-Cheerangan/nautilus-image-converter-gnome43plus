@@ -43,7 +43,6 @@ struct _NautilusImageRotatorPrivate {
 	
 	int images_rotated;
 	int images_total;
-	gboolean cancelled;
 	
 	gchar *angle;
 
@@ -182,11 +181,35 @@ nautilus_image_rotator_transform_filename (NautilusImageRotator *rotator, GFile 
 }
 
 static void
+retry_dialog_cb (GtkDialog *dialog,
+                 gint       response_id,
+                 gpointer   user_data)
+{
+	NautilusImageRotator *rotator = NAUTILUS_IMAGE_ROTATOR (user_data);
+	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
+
+	gtk_window_destroy (GTK_WINDOW (dialog));
+	if (response_id == GTK_RESPONSE_CANCEL) {
+		gtk_window_destroy (GTK_WINDOW (priv->progress_dialog));
+		return;
+	} else if (response_id == 1) {
+		priv->images_rotated++;
+		priv->files = priv->files->next;
+	}
+
+	if (priv->files != NULL) {
+		/* process next image */
+		run_op (rotator);
+	} else {
+		/* cancel/terminate operation */
+		gtk_window_destroy (GTK_WINDOW (priv->progress_dialog));
+	}
+}
+
+static void
 op_finished (GPid pid, gint status, gpointer data)
 {
 	NautilusImageRotator *rotator = NAUTILUS_IMAGE_ROTATOR (data);
-	
-	gboolean retry = TRUE;
 	NautilusImageRotatorPrivate *priv = nautilus_image_rotator_get_instance_private (rotator);
 	
 	NautilusFileInfo *file = NAUTILUS_FILE_INFO (priv->files->data);
@@ -194,8 +217,6 @@ op_finished (GPid pid, gint status, gpointer data)
 	if (status != 0) {
 		/* rotating failed */
 		char *name = nautilus_file_info_get_name (file);
-#if 0
-    /* reimpliment dialog */
 		GtkWidget *msg_dialog = gtk_message_dialog_new (GTK_WINDOW (priv->progress_dialog),
 			GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR,
 			GTK_BUTTONS_NONE,
@@ -208,16 +229,9 @@ op_finished (GPid pid, gint status, gpointer data)
 		gtk_dialog_add_button (GTK_DIALOG (msg_dialog), _("_Retry"), 0);
 		gtk_dialog_set_default_response (GTK_DIALOG (msg_dialog), 0);
 		
-		int response_id = gtk_dialog_run (GTK_DIALOG (msg_dialog));
-		gtk_widget_destroy (msg_dialog);
-		if (response_id == 0) {
-			retry = TRUE;
-		} else if (response_id == GTK_RESPONSE_CANCEL) {
-			priv->cancelled = TRUE;
-		} else if (response_id == 1) {
-			retry = FALSE;
-		}
-#endif
+		g_signal_connect (msg_dialog, "response", G_CALLBACK (retry_dialog_cb), data);
+		gtk_widget_show (msg_dialog);
+		return;
 	} else if (priv->suffix == NULL) {
 		/* rotate image in place */
 		GFile *orig_location = nautilus_file_info_get_location (file);
@@ -227,13 +241,10 @@ op_finished (GPid pid, gint status, gpointer data)
 		g_object_unref (new_location);
 	}
 
-	if (status == 0 || !retry) {
-		/* image has been successfully rotated (or skipped) */
-		priv->images_rotated++;
-		priv->files = priv->files->next;
-	}
+	priv->images_rotated++;
+	priv->files = priv->files->next;
 	
-	if (!priv->cancelled && priv->files != NULL) {
+	if (priv->files != NULL) {
 		/* process next image */
 		run_op (rotator);
 	} else {
