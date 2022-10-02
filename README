@@ -8,6 +8,12 @@ Hacking:
 
 n-i-c can be check out with the following command:
 
-git clone git://git.gnome.org/nautilus-image-converter
+git clone https://gitlab.gnome.org/coreyberla/nautilus-image-converter.git
 
 Patches welcomed!
+
+Installing:
+========
+meson build
+ninja -C build
+sudo ninja install -C build
