@@ -1,175 +1,178 @@
-# Spanish translation of nautilus-image-converter.
-# Copyright (C) 2009 THE nautilus-image-converter'S COPYRIGHT HOLDER
+# Hungarian translation of nautilus-image-converter.
+# Copyright (C) 2007 THE nautilus-image-converter'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the nautilus-image-converter package.
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: nautilus-image-converter 0.0.9\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-12-15 22:19+0900\n"
-"PO-Revision-Date: 2009-11-27 13:44-0300\n"
-"Last-Translator: Federico Vera <dktcoding@gmail.com>\n"
-"Language-Team: \n"
+"PO-Revision-Date: 2010-08-08 20:52+0100\n"
+"Last-Translator: Laszlo Janosek <laszlo@janosekweb.com>\n"
+"Language-Team: Hungarian <laszlo@janosekweb.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit"
+"Content-Transfer-Encoding: 8bit\n"
 
 #: ../src/nautilus-image-converter.c:118
 msgid "_Resize Images..."
-msgstr "_Redimensionar imágenes..."
+msgstr "_Képek Átméretezése..."
 
 #: ../src/nautilus-image-converter.c:119
 msgid "Resize each selected image"
-msgstr "Redimensionar cada imagen seleccionada"
+msgstr "Kijelölt képek átméretezése"
 
 #: ../src/nautilus-image-converter.c:128
 msgid "Ro_tate Images..."
-msgstr "Ro_tar Imágenes..."
+msgstr "_Képek Forgatása..."
 
 #: ../src/nautilus-image-converter.c:129
 msgid "Rotate each selected image"
-msgstr "Rotar cada imagen seleccionada"
+msgstr "Kijelölt képek forgatása"
 
-#: ../src/nautilus-image-resizer.c:224 ../src/nautilus-image-rotator.c:221
+#: ../src/nautilus-image-resizer.c:224
+#: ../src/nautilus-image-rotator.c:221
 msgid "_Skip"
-msgstr "_Saltear"
+msgstr "Kihagy"
 
-#: ../src/nautilus-image-resizer.c:226 ../src/nautilus-image-rotator.c:223
+#: ../src/nautilus-image-resizer.c:226
+#: ../src/nautilus-image-rotator.c:223
 msgid "_Retry"
-msgstr "_Reintentar"
+msgstr "_Újra"
 
 #: ../src/nautilus-image-resizer.c:343
 #, c-format
 msgid "Resizing image: %d of %d"
-msgstr "Redimensionando imagen: %d de %d"
+msgstr "Kép átméretezése: %d of %d"
 
 #: ../src/nautilus-image-resizer.c:348
 #, c-format
 msgid "<i>Resizing \"%s\"</i>"
-msgstr "<i>Redimensionando\"%s\"</i>"
+msgstr "<i>Átméretezés \"%s\"</i>"
 
-#: ../src/nautilus-image-resizer.c:366 ../src/nautilus-image-rotator.c:363
+#: ../src/nautilus-image-resizer.c:366
+#: ../src/nautilus-image-rotator.c:363
 msgid "Please enter a valid filename suffix!"
-msgstr "Por favor ingrese un sufijo de archivo válido!"
+msgstr "Kérem adjon meg valós kiterjesztést!"
 
 #: ../src/nautilus-image-resize.glade.h:1
 msgid ".resized"
-msgstr ".redimensionado"
+msgstr ".átméretezett"
 
 #: ../src/nautilus-image-resize.glade.h:2
 #: ../src/nautilus-image-rotate.glade.h:5
 #: ../src/nautilus-image-resize.glade.h:3
 msgid "<b>Filename</b><b>Image Size</b>"
-msgstr "<b>Nombre de archivo</b><b>Tamaño de Imagen</b>"
+msgstr "<b>Fájlnév</b><b>Kép Méret</b>"
 
 #: ../src/nautilus-image-resize.glade.h:4
 #: ../src/nautilus-image-rotate.glade.h:7
 msgid "Append"
-msgstr "Anexar"
+msgstr "Hozzáad"
 
 #: ../src/nautilus-image-resize.glade.h:5
 msgid "Custom size:"
-msgstr "Tamaño personalizado:"
+msgstr "Egyedi felbontás:"
 
 #: ../src/nautilus-image-resize.glade.h:6
 msgid "Height:"
-msgstr "Altura:"
+msgstr "Magasság:"
 
 #: ../src/nautilus-image-resize.glade.h:7
 msgid "Resize Images"
-msgstr "Redimensionar Imágenes"
+msgstr "Képek Átméretezése"
 
 #: ../src/nautilus-image-resize.glade.h:8
 msgid "Resize in place"
-msgstr "Redimensionar en el lugar"
+msgstr "Átméretezés helyben (felülírva az eredet fájlt)"
 
 #: ../src/nautilus-image-resize.glade.h:9
 msgid "Scale:"
-msgstr "Escala:"
+msgstr "Méretarány:"
 
 #: ../src/nautilus-image-resize.glade.h:10
 msgid "Select a size:"
-msgstr "Seleccione un tamaño:"
+msgstr "Felbontás választása:"
 
 #: ../src/nautilus-image-resize.glade.h:11
 msgid "Width:"
-msgstr "Ancho:"
+msgstr "Szélesség:"
 
 #: ../src/nautilus-image-resize.glade.h:12
 msgid "_Resize"
-msgstr "_Redimensionar"
+msgstr "_Átméretezés"
 
 #: ../src/nautilus-image-resize.glade.h:13
 msgid "percent"
-msgstr "por ciento"
+msgstr "százalék"
 
 #: ../src/nautilus-image-resize.glade.h:14
 msgid "pixels"
-msgstr "pixeles"
+msgstr "képpont"
 
 #: ../src/nautilus-image-resize.glade.h:15
 #: ../src/nautilus-image-rotate.glade.h:14
 msgid "to file title"
-msgstr "al nombre de archivo"
+msgstr "a fájl nevéhez"
 
 #: ../src/nautilus-image-rotator.c:340
 #, c-format
 msgid "Rotating image: %d of %d"
-msgstr "Rotando imagen: %d de %d"
+msgstr "Kép forgatása: %d z %d"
 
 #: ../src/nautilus-image-rotator.c:345
 #, c-format
 msgid "<i>Rotating \"%s\"</i>"
-msgstr "<i>Rotando \"%s\"</i>"
+msgstr "<i>Forgatás \"%s\"</i>"
 
 #: ../src/nautilus-image-rotate.glade.h:1
 msgid ".rotated"
-msgstr ".rotada"
+msgstr ".elfordított"
 
 #: ../src/nautilus-image-rotate.glade.h:2
 msgid ""
-"90Â° clockwise\n"
-"90Â° counter-clockwise\n"
-"180Â°"
+"90° clockwise\n"
+"90° counter-clockwise\n"
+"180°"
 msgstr ""
-"90Â° sentido horario\n"
-"90Â° sentido anti-horario\n"
-"180Â°"
+"90° jobbra\n"
+"90° balra\n"
+"180°"
 
 #: ../src/nautilus-image-rotate.glade.h:6
 msgid "<b>Image Rotation</b>"
-msgstr "<b>Rotación de Imagen</b>"
+msgstr "<b>Kép Forgatása</b>"
 
 #: ../src/nautilus-image-rotate.glade.h:8
 msgid "Custom angle:"
-msgstr "Ángulo personalizado:"
+msgstr "Egyedi forgatási szög:"
 
 #: ../src/nautilus-image-rotate.glade.h:9
 msgid "Rotate Images"
-msgstr "Rotar Imágenes"
+msgstr "Képek forgatása"
 
 #: ../src/nautilus-image-rotate.glade.h:10
 msgid "Rotate in place"
-msgstr "Rotar en el lugar"
+msgstr "Forgatás helyben (felülírva az eredeti fájlt)"
 
 #: ../src/nautilus-image-rotate.glade.h:11
 msgid "Select an angle:"
-msgstr "Seleccionar un ángulo:"
+msgstr "Forgatási szög választása:"
 
 #: ../src/nautilus-image-rotate.glade.h:12
 msgid "_Rotate"
-msgstr "_Rotar"
+msgstr "_Forgatás"
 
 #: ../src/nautilus-image-rotate.glade.h:13
 msgid "degrees clockwise"
-msgstr "grados en sentido horario"
+msgstr "óramutató járásának megfelelően"
 
-#: ../src/nautilus-image-resize.glade.h:2                                                                                                                    
-#: ../src/nautilus-image-rotate.glade.h:5                                                                                                                    
+#: ../src/nautilus-image-resize.glade.h:2
+#: ../src/nautilus-image-rotate.glade.h:5
 msgid "<b>Filename</b>"
-msgstr "<b>Nombre de archivo</b>"
+msgstr "<b>Fájlnév</b>"
 
-#: ../src/nautilus-image-resize.glade.h:3                                                                                                                    
+#: ../src/nautilus-image-resize.glade.h:3
 msgid "<b>Image Size</b>"
-msgstr "<b>Tamaño de Imagen</b>"
+msgstr "<b>Kép Mérete</b>"
 

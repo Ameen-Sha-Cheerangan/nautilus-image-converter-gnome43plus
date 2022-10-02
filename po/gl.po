@@ -1,0 +1,135 @@
+# Galician translation of Nautilus Image Converter
+# Copyright (C) 2005 THE Nautilus Image Converter'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Nautilus Image Converter package.
+# Stephen Denham <stephen.denham@gmail.com>, 2007.
+# , fuzzy
+#
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Nautilus Image Converter 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-09-18 00:16+0200\n"
+"PO-Revision-Date: 2009-11-12 10:23+0100\n"
+"Last-Translator: Daniel Espinheira <daniel.espinheira@gmail.com>\n"
+"Language-Team: Galician <>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../src/nautilus-image-converter.c:109
+msgid "_Resize Images..."
+msgstr "_Redimensionar imaxes..."
+
+#: ../src/nautilus-image-converter.c:110
+msgid "Resize each selected image"
+msgstr "Redimensionar cada imaxe seleccionada"
+
+#: ../src/nautilus-image-resizer.c:219
+msgid "_Skip"
+msgstr "Omitir"
+
+#: ../src/nautilus-image-resizer.c:221
+msgid "_Retry"
+msgstr "Tenta_r de novo"
+
+#: ../src/nautilus-image-resizer.c:340
+#, c-format
+msgid "Resizing image: %d of %d"
+msgstr "Redimensionando imaxe: %d de %d"
+
+#: ../src/nautilus-image-resizer.c:345
+#, c-format
+msgid "<i>Resizing \"%s\"</i>"
+msgstr "<i>Redimensionando \"%s\"</i>"
+
+#: ../src/nautilus-image-resizer.c:363
+msgid "Please enter a valid filename suffix!"
+msgstr "Insira un sufixo de nome de ficheiro válido!"
+
+#: ../src/nautilus-image-resize.glade.h:1
+msgid ".resized"
+msgstr ".redimensionado"
+
+#: ../src/nautilus-image-resize.glade.h:2
+msgid "<b>Filename</b>"
+msgstr "<b>Nome do ficheiro</b>"
+
+#: ../src/nautilus-image-resize.glade.h:3
+msgid "<b>Image Size</b>"
+msgstr "<b>Tamaño da imaxe</b>"
+
+#: ../src/nautilus-image-resize.glade.h:4
+msgid "Append"
+msgstr "Engadir ao final"
+
+#: ../src/nautilus-image-resize.glade.h:5
+msgid "Custom size:"
+msgstr "Tamaño personalizado:"
+
+#: ../src/nautilus-image-resize.glade.h:6
+msgid "Height:"
+msgstr "Altura:"
+
+#: ../src/nautilus-image-resize.glade.h:7
+msgid "Resize Images"
+msgstr "Redimensionar imaxes"
+
+#: ../src/nautilus-image-resize.glade.h:8
+msgid "Resize in place"
+msgstr "Redimensionar no mesmo ficheiro"
+
+#: ../src/nautilus-image-resize.glade.h:9
+msgid "Select a size:"
+msgstr "Seleccione un tamaño:"
+
+#: ../src/nautilus-image-resize.glade.h:10
+msgid "Width:"
+msgstr "Ancho:"
+
+#: ../src/nautilus-image-resize.glade.h:11
+msgid "pixels"
+msgstr "pixeles"
+
+#: ../src/nautilus-image-resize.glade.h:12
+msgid "to file title"
+msgstr "ao nome do ficheiro"
+
+msgid "Scale:"
+msgstr "Escalar:"
+
+msgid "_Resize"
+msgstr "_Redimensionar"
+
+msgid "percent"
+msgstr "porcentaxe"
+
+msgid "Ro_tate Images..."
+msgstr "Ro_tar imaxes..."
+
+msgid "Rotate Images"
+msgstr "Rotar imaxes"
+
+msgid "Select an angle:"
+msgstr "Seleccione un ángulo:"
+
+msgid "Custom angle:"
+msgstr "Ángulo:"
+
+msgid "degrees clockwise"
+msgstr "graos no sentido horario"
+
+msgid "clockwise"
+msgstr "sentido horario"
+
+msgid "Rotate in place"
+msgstr "Rotar no mesmo ficheiro"
+
+msgid "<b>Image Rotation</b>"
+msgstr "<b>Rotación de imaxe</b>"
+
+msgid "_Rotate"
+msgstr "_Rotar"
+
+msgid ".rotated"
+msgstr ".rotado"

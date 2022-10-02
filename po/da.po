@@ -1,175 +1,176 @@
-# Spanish translation of nautilus-image-converter.
-# Copyright (C) 2009 THE nautilus-image-converter'S COPYRIGHT HOLDER
+# Danish translation of nautilus-image-converter.
+# Copyright (C) 2004 - 2006 Jürg Billeter <j@bitron.ch>
 # This file is distributed under the same license as the nautilus-image-converter package.
-# 
+# Anders Jenbo <anders@jenbo.dk>, 2010
+#
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: nautilus-image-converter 0.0.9\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-12-15 22:19+0900\n"
-"PO-Revision-Date: 2009-11-27 13:44-0300\n"
-"Last-Translator: Federico Vera <dktcoding@gmail.com>\n"
+"POT-Creation-Date: 2007-05-12 17:13+0200\n"
+"PO-Revision-Date: 2010-04-14 18:11+0100\n"
+"Last-Translator: Anders Jenbo <anders@jenbo.dk>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Danish\n"
+"X-Poedit-Country: DENMARK\n"
 
 #: ../src/nautilus-image-converter.c:118
 msgid "_Resize Images..."
-msgstr "_Redimensionar imágenes..."
+msgstr "Ænd_r størrelse på billeder..."
 
 #: ../src/nautilus-image-converter.c:119
 msgid "Resize each selected image"
-msgstr "Redimensionar cada imagen seleccionada"
+msgstr "Ændr størrelse på hver markeret billede"
 
 #: ../src/nautilus-image-converter.c:128
 msgid "Ro_tate Images..."
-msgstr "Ro_tar Imágenes..."
+msgstr "Ro_ter billeder..."
 
 #: ../src/nautilus-image-converter.c:129
 msgid "Rotate each selected image"
-msgstr "Rotar cada imagen seleccionada"
+msgstr "Roter hvert markeret billede"
 
-#: ../src/nautilus-image-resizer.c:224 ../src/nautilus-image-rotator.c:221
+#: ../src/nautilus-image-resizer.c:224
+#: ../src/nautilus-image-rotator.c:221
 msgid "_Skip"
-msgstr "_Saltear"
+msgstr "_Spring over"
 
-#: ../src/nautilus-image-resizer.c:226 ../src/nautilus-image-rotator.c:223
+#: ../src/nautilus-image-resizer.c:226
+#: ../src/nautilus-image-rotator.c:223
 msgid "_Retry"
-msgstr "_Reintentar"
+msgstr "P_røv igen"
 
 #: ../src/nautilus-image-resizer.c:343
 #, c-format
 msgid "Resizing image: %d of %d"
-msgstr "Redimensionando imagen: %d de %d"
+msgstr "Ændr størrelse på billede: %d af %d"
 
 #: ../src/nautilus-image-resizer.c:348
 #, c-format
 msgid "<i>Resizing \"%s\"</i>"
-msgstr "<i>Redimensionando\"%s\"</i>"
+msgstr "<i>Ændr størrelsen på \"%s\"</i>"
 
-#: ../src/nautilus-image-resizer.c:366 ../src/nautilus-image-rotator.c:363
+#: ../src/nautilus-image-resizer.c:366
+#: ../src/nautilus-image-rotator.c:363
 msgid "Please enter a valid filename suffix!"
-msgstr "Por favor ingrese un sufijo de archivo válido!"
+msgstr "Indtast en gyldig filnavnsendelse!"
 
 #: ../src/nautilus-image-resize.glade.h:1
 msgid ".resized"
-msgstr ".redimensionado"
+msgstr ".ændret"
 
 #: ../src/nautilus-image-resize.glade.h:2
 #: ../src/nautilus-image-rotate.glade.h:5
+msgid "<b>Filename</b>"
+msgstr "<b>Filnavn</b>"
+
 #: ../src/nautilus-image-resize.glade.h:3
-msgid "<b>Filename</b><b>Image Size</b>"
-msgstr "<b>Nombre de archivo</b><b>Tamaño de Imagen</b>"
+msgid "<b>Image Size</b>"
+msgstr "<b>Billedstørrelse</b>"
 
 #: ../src/nautilus-image-resize.glade.h:4
 #: ../src/nautilus-image-rotate.glade.h:7
 msgid "Append"
-msgstr "Anexar"
+msgstr "Tilføj"
 
 #: ../src/nautilus-image-resize.glade.h:5
 msgid "Custom size:"
-msgstr "Tamaño personalizado:"
+msgstr "Brugerdefineret størrelse:"
 
 #: ../src/nautilus-image-resize.glade.h:6
 msgid "Height:"
-msgstr "Altura:"
+msgstr "Højde:"
 
 #: ../src/nautilus-image-resize.glade.h:7
 msgid "Resize Images"
-msgstr "Redimensionar Imágenes"
+msgstr "Ændr størrelse på billeder"
 
 #: ../src/nautilus-image-resize.glade.h:8
 msgid "Resize in place"
-msgstr "Redimensionar en el lugar"
+msgstr "Ændr original"
 
 #: ../src/nautilus-image-resize.glade.h:9
 msgid "Scale:"
-msgstr "Escala:"
+msgstr "Skala:"
 
 #: ../src/nautilus-image-resize.glade.h:10
 msgid "Select a size:"
-msgstr "Seleccione un tamaño:"
+msgstr "Vælg en størrelse:"
 
 #: ../src/nautilus-image-resize.glade.h:11
 msgid "Width:"
-msgstr "Ancho:"
+msgstr "Bredde:"
 
 #: ../src/nautilus-image-resize.glade.h:12
 msgid "_Resize"
-msgstr "_Redimensionar"
+msgstr "Ænd_r størrelse"
 
 #: ../src/nautilus-image-resize.glade.h:13
 msgid "percent"
-msgstr "por ciento"
+msgstr "procent"
 
 #: ../src/nautilus-image-resize.glade.h:14
 msgid "pixels"
-msgstr "pixeles"
+msgstr "billedpunkter"
 
 #: ../src/nautilus-image-resize.glade.h:15
 #: ../src/nautilus-image-rotate.glade.h:14
 msgid "to file title"
-msgstr "al nombre de archivo"
+msgstr "til filnavn"
 
 #: ../src/nautilus-image-rotator.c:340
 #, c-format
 msgid "Rotating image: %d of %d"
-msgstr "Rotando imagen: %d de %d"
+msgstr "Rotere billede: %d af %d"
 
 #: ../src/nautilus-image-rotator.c:345
 #, c-format
 msgid "<i>Rotating \"%s\"</i>"
-msgstr "<i>Rotando \"%s\"</i>"
+msgstr "<i>Rotere \"%s\"</i>"
 
 #: ../src/nautilus-image-rotate.glade.h:1
 msgid ".rotated"
-msgstr ".rotada"
+msgstr ".roteret"
 
 #: ../src/nautilus-image-rotate.glade.h:2
 msgid ""
-"90Â° clockwise\n"
-"90Â° counter-clockwise\n"
-"180Â°"
+"90° clockwise\n"
+"90° counter-clockwise\n"
+"180°"
 msgstr ""
-"90Â° sentido horario\n"
-"90Â° sentido anti-horario\n"
-"180Â°"
+"90° med uret\n"
+"90° mod uret\n"
+"180°"
 
 #: ../src/nautilus-image-rotate.glade.h:6
 msgid "<b>Image Rotation</b>"
-msgstr "<b>Rotación de Imagen</b>"
+msgstr "<b>Billedrotation</b>"
 
 #: ../src/nautilus-image-rotate.glade.h:8
 msgid "Custom angle:"
-msgstr "Ángulo personalizado:"
+msgstr "Brugerdefineret vinkel:"
 
 #: ../src/nautilus-image-rotate.glade.h:9
 msgid "Rotate Images"
-msgstr "Rotar Imágenes"
+msgstr "Roter billeder"
 
 #: ../src/nautilus-image-rotate.glade.h:10
 msgid "Rotate in place"
-msgstr "Rotar en el lugar"
+msgstr "Roter original"
 
 #: ../src/nautilus-image-rotate.glade.h:11
 msgid "Select an angle:"
-msgstr "Seleccionar un ángulo:"
+msgstr "Vælg en vinkel:"
 
 #: ../src/nautilus-image-rotate.glade.h:12
 msgid "_Rotate"
-msgstr "_Rotar"
+msgstr "_Roter"
 
 #: ../src/nautilus-image-rotate.glade.h:13
 msgid "degrees clockwise"
-msgstr "grados en sentido horario"
-
-#: ../src/nautilus-image-resize.glade.h:2                                                                                                                    
-#: ../src/nautilus-image-rotate.glade.h:5                                                                                                                    
-msgid "<b>Filename</b>"
-msgstr "<b>Nombre de archivo</b>"
-
-#: ../src/nautilus-image-resize.glade.h:3                                                                                                                    
-msgid "<b>Image Size</b>"
-msgstr "<b>Tamaño de Imagen</b>"
+msgstr "grader med uret"
 
