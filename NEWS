@@ -6,9 +6,7 @@ General
         * Enable silent build
 		* Add resize-to-target-file-size option for JPEG/PNG (via jpegoptim / ImageMagick)
 
-
 Translators
-
         * Yaron Shahrabani (he)
         * Siegfried-Angel Gevatter Pujals (ca)
         * Jens Wiesser (de)
