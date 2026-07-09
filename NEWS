@@ -4,6 +4,8 @@ General
         * Port to Gtk3/GNOME3
         * Fix distcheck so that it works without root privileges
         * Enable silent build
+		* Add resize-to-target-file-size option for JPEG/PNG (via jpegoptim / ImageMagick)
+
 
 Translators
 

@@ -1,3 +1,8 @@
+2026-07-10  Ameen Sha C  <ameenshac981@gmail.com>
+
+        * Add target file size resize option (jpegoptim / convert -define extent)
+        * Fix Nautilus view not refreshing after target-size resize
+
 2022-09-13 Corey Berla <corey@berla.me>
 
         * Port to GTK4
