@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: ../src/nautilus-image-converter.c:118
-msgid "_Resize Images..."
+msgid "_Resize Images(modified)..."
 msgstr "Ändra s_torlek på bilder..."
 
 #: ../src/nautilus-image-converter.c:119

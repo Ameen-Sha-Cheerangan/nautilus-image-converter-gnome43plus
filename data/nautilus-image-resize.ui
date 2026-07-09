@@ -22,6 +22,13 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkAdjustment" id="adjustment4">
+  <property name="lower">1</property>
+  <property name="upper">100000</property>
+  <property name="value">100</property>
+  <property name="step_increment">1</property>
+  <property name="page_increment">10</property>
+  </object>
   <object class="GtkDialog" id="resize_dialog">
     <property name="margin-top">12</property>
     <property name="margin-bottom">12</property>
@@ -171,6 +178,40 @@
                         </child>
                       </object>
                     </child>
+                    <child>
+                    <object class="GtkBox" id="hbox_target_size">
+                      <property name="vexpand">1</property>
+                      <property name="spacing">6</property>
+
+                      <child>
+                        <object class="GtkCheckButton" id="target_size_radiobutton">
+                          <property name="halign">center</property>
+                          <property name="label" translatable="1">Target size (approx.):</property>
+                          <property name="use_underline">1</property>
+                          <property name="group">default_size_radiobutton</property>
+                        </object>
+                      </child>
+
+                      <child>
+                        <object class="GtkSpinButton" id="target_size_spinbutton">
+                          <property name="hexpand">1</property>
+                          <property name="adjustment">adjustment4</property>
+                          <property name="numeric">1</property>
+                        </object>
+                      </child>
+
+                      <child>
+                        <object class="GtkComboBoxText" id="target_size_unit_combobox">
+                          <property name="active">0</property>
+                          <items>
+                            <item>KB</item>
+                            <item>MB</item>
+                          </items>
+                        </object>
+                      </child>
+
+                    </object>
+                  </child>
                   </object>
                 </child>
               </object>
@@ -213,7 +254,7 @@
                           <object class="GtkEntry" id="name_entry">
                             <property name="hexpand">1</property>
                             <property name="text" translatable="true">.resized</property>
-		            <property name="activates-default">true</property>
+                    <property name="activates-default">true</property>
                           </object>
                         </child>
                         <child>
