@@ -7,6 +7,21 @@ This repository is an enhanced fork of the original extension, featuring new imp
 ## ✨ New in this Fork
 * **Target File Size Compression:** You can now compress and resize images to match a specific target file size (e.g., 500KB, 2MB). This is perfect for optimizing images for web uploads, email attachments, or strict size limits without having to guess the correct quality settings.
 
+
+
+## Core Features (from Original Project)
+
+All the original features of the `nautilus-image-converter` are fully intact:
+
+* **Resize by Scale:** Scale images by a percentage (e.g., 50%).
+* **Resize by Custom Size:** Set a specific pixel width and height.
+* **Rotate Images:** Rotate 90°, 180°, or by a custom angle.
+* **In-Place or New File:** Choose to overwrite your original images or create new copies (e.g., `image.resized.jpg`).
+
+  
+<img src="images/SS1.png" width="45%"> <img src="images/SS2.png" width="45%">
+
+
 ## 📥 Installation
 
 To build and install the extension from source, run the following commands:
@@ -32,6 +47,15 @@ sudo ninja install -C build
 nautilus -q
 ```
 
+## 🗑️ Uninstallation
+
+Navigate to your project directory (`nautilus-image-converter`) where you built the project:
+
+```bash
+cd nautilus-image-converter
+sudo ninja uninstall -C build
+```
+
 ## 🕰️ Older GNOME Versions (GNOME < 43)
 
 Are you using an older version of GNOME (e.g., Ubuntu 22.04 or earlier)? This repository requires GNOME 43+ and GTK4. 
@@ -42,12 +66,36 @@ For older systems, please use the **[Legacy Version](https://github.com/Ameen-Sh
 
 Patches, bug reports, and feature requests are always welcome! Feel free to open an Issue or a Pull Request on this repository.
 
+## ⭐ Show Your Support
+
+If you found this extension helpful, please consider giving this repository a star on GitHub! It helps others find the project.
+
+
 ## ☕ Support this Project
 
 If this tool helped you, consider supporting its development!
 
-*   **🌐 International Users:** You can support me instantly via [Ko-fi](https://ko-fi.com/ameen_sha).
-*   **🇮🇳 Users in India (UPI):** You can support directly via any UPI app using the UPI ID: `ameenshahcheerangan-1@okicici`
+### 🌐 International Users
+You can support me instantly via **Ko-fi**.
+
+<a href="https://ko-fi.com/ameen_sha" target="_blank">
+  <img src="https://storage.ko-fi.com/cdn/brandasset/kofi_button_blue.png" alt="Buy Me a Coffee at ko-fi.com" height="36" />
+</a>
+
+### 🇮🇳 Users in India (UPI)
+You can support directly via any UPI app (GPay, PhonePe, Paytm) using the QR code or ID below:
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/Ameen-Sha-Cheerangan/.github/main/assets/upi-qr.jpg" alt="UPI QR Code" width="220"/>
+  <br/>
+  <b>UPI ID:</b> <code>ameenshahcheerangan-1@okicici</code>
+</div>
+
+<br/>
+
+> **📱 Viewing on mobile?** 
+> * **Direct Link:** [Click here to open your UPI app](https://upi.pe/ameenshahcheerangan-1@okicici?pn=Ameen+Sha+C)
+> * **Manual Scan:** Take a screenshot of the QR code above and upload it directly inside your UPI app (GPay, PhonePe, Paytm, etc.).
 
 ## 📜 Credits & Acknowledgments
 
