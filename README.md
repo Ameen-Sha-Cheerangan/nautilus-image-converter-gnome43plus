@@ -71,9 +71,9 @@ Patches, bug reports, and feature requests are always welcome! Feel free to open
 If you found this extension helpful, please consider giving this repository a star on GitHub! It helps others find the project.
 
 
-## ☕ Support this Project
+## ☕ Support the Developer
 
-If this tool helped you, consider supporting its development!
+If this tool helped you, consider supporting its developer!
 
 ### 🌐 International Users
 You can support me instantly via **Ko-fi**.
