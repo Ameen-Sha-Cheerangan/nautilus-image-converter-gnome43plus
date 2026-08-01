@@ -18,8 +18,7 @@ All the original features of the `nautilus-image-converter` are fully intact:
 * **Rotate Images:** Rotate 90°, 180°, or by a custom angle.
 * **In-Place or New File:** Choose to overwrite your original images or create new copies (e.g., `image.resized.jpg`).
 
-  
-<img src="images/SS1.png" width="49%"> <img src="images/SS2.png" width="49%">
+<img src="images/SS3.png" width="19%"> <img src="images/SS1.png" width="39%"> <img src="images/SS2.png" width="39%">
 
 
 ## 📥 Installation
