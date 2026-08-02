@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkDialog" id="format_dialog">
+    <property name="margin-top">12</property>
+    <property name="margin-bottom">12</property>
+    <property name="margin-start">12</property>
+    <property name="margin-end">12</property>
+    <property name="use-header-bar">1</property>
+    <property name="resizable">False</property>
+    <property name="title" translatable="1">Convert Image Format</property>
+    <child internal-child="content_area">
+      <object class="GtkBox" id="dialog-vbox1">
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+        <child>
+          <object class="GtkBox" id="vbox1">
+            <property name="orientation">vertical</property>
+            <property name="margin-top">12</property>
+            <property name="margin-bottom">12</property>
+            <property name="margin-start">12</property>
+            <property name="margin-end">12</property>
+            <property name="spacing">12</property>
+            <child>
+              <object class="GtkLabel" id="label_format_title">
+                <property name="valign">center</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="1">&lt;b&gt;Target Format&lt;/b&gt;</property>
+                <property name="use_markup">1</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="hbox_format">
+                <property name="valign">center</property>
+                <property name="spacing">12</property>
+                <child>
+                  <object class="GtkLabel" id="label_indent1">
+                    <property name="halign">center</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="vbox_format_inner">
+                    <property name="hexpand">1</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkBox" id="hbox_combo">
+                        <property name="valign">center</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkLabel" id="label_select_format">
+                            <property name="halign">center</property>
+                            <property name="label" translatable="1">Select format:</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkComboBoxText" id="format_combobox">
+                            <property name="hexpand">1</property>
+                            <property name="active">0</property>
+                            <items>
+                              <item id="webp" translatable="yes">WebP (.webp)</item>
+                              <item id="png" translatable="yes">PNG (.png)</item>
+                              <item id="jpg" translatable="yes">JPEG (.jpg)</item>
+                              <item id="avif" translatable="yes">AVIF (.avif)</item>
+                              <item id="gif" translatable="yes">GIF (.gif)</item>
+                            </items>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label_filename_title">
+                <property name="valign">center</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="1">&lt;b&gt;Filename&lt;/b&gt;</property>
+                <property name="use_markup">1</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="hbox_filename">
+                <property name="valign">center</property>
+                <property name="spacing">12</property>
+                <child>
+                  <object class="GtkLabel" id="label_indent2">
+                    <property name="halign">center</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="vbox_filename_inner">
+                    <property name="hexpand">1</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkBox" id="hbox_append">
+                        <property name="vexpand">1</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkCheckButton" id="append_radiobutton">
+                            <property name="halign">center</property>
+                            <property name="active">true</property>
+                            <property name="label" translatable="1">Append</property>
+                            <property name="use_underline">1</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="name_entry">
+                            <property name="hexpand">1</property>
+                            <property name="text" translatable="true"></property>
+                            <property name="placeholder-text" translatable="true">(optional suffix, e.g. .converted)</property>
+                            <property name="activates-default">true</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label_to_file">
+                            <property name="halign">center</property>
+                            <property name="label" translatable="1">to file title</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="delete_orig_radiobutton">
+                        <property name="valign">center</property>
+                        <property name="label" translatable="1">Delete original file after conversion</property>
+                        <property name="use_underline">1</property>
+                        <property name="group">append_radiobutton</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="cancel">cancel_button</action-widget>
+      <action-widget response="ok" default="true">ok_button</action-widget>
+    </action-widgets>
+    <child type="action">
+      <object class="GtkButton" id="cancel_button">
+        <property name="label" translatable="yes">_Cancel</property>
+        <property name="use_underline">1</property>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="ok_button">
+        <property name="label" translatable="yes">_Convert</property>
+        <property name="use_underline">1</property>
+      </object>
+    </child>
+  </object>
+</interface>
