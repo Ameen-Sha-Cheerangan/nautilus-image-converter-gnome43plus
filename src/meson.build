@@ -6,7 +6,10 @@ libnautilus_image_converter_sources = [
   'nautilus-image-resizer.h',
   'nautilus-image-rotator.c',
   'nautilus-image-rotator.h',
+  'nautilus-image-format-changer.c',
+  'nautilus-image-format-changer.h',
 ]
+
 
 libnautilus_image_converter_dependencies = [
   glib,
