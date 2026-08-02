@@ -26,6 +26,7 @@
 #include "nautilus-image-converter.h"
 #include "nautilus-image-resizer.h"
 #include "nautilus-image-rotator.h"
+#include "nautilus-image-format-changer.h"
 
 #include <nautilus-extension.h>
 
@@ -94,6 +95,14 @@ image_rotate_callback (NautilusMenuItem *item,
 	nautilus_image_rotator_show_dialog (rotator);
 }
 
+static void
+image_format_changer_callback (NautilusMenuItem *item,
+			       GList *files)
+{
+	NautilusImageFormatChanger *changer = nautilus_image_format_changer_new (image_converter_filter_images (files));
+	nautilus_image_format_changer_show_dialog (changer);
+}
+
 GList *
 nautilus_image_converter_get_file_items (NautilusMenuProvider *provider,
 				       GList                *files)
@@ -120,6 +129,16 @@ nautilus_image_converter_get_file_items (NautilusMenuProvider *provider,
 				       "stock_rotate");
 			g_signal_connect (item, "activate",
 					  G_CALLBACK (image_rotate_callback),
+					  nautilus_file_info_list_copy (files));
+
+			items = g_list_prepend (items, item);
+
+			item = nautilus_menu_item_new ("NautilusImageConverter::format",
+				        _("Convert _Format..."),
+				        _("Convert format of each selected image"),
+				       "image-x-generic");
+			g_signal_connect (item, "activate",
+					  G_CALLBACK (image_format_changer_callback),
 					  nautilus_file_info_list_copy (files));
 
 			items = g_list_prepend (items, item);
