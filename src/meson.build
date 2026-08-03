@@ -15,6 +15,7 @@ libnautilus_image_converter_dependencies = [
   glib,
   gtk,
   libnautilus_extension,
+  m_dep,
 ]
 
 libnautilus_image_converter = library('nautilus-image-converter',
