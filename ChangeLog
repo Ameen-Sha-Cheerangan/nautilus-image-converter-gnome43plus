@@ -1,3 +1,9 @@
+2026-08-03  Ameen Sha C  <ameenshac981@gmail.com>
+
+	* Add target size zero-byte padding option for strict file size thresholds
+	* Ensure target size mode strictly preserves 100% original resolution for JPEG and PNG
+	* Align target size units to decimal base-1000 to match GNOME/Nautilus SI standards
+
 2026-07-10  Ameen Sha C  <ameenshac981@gmail.com>
 
         * Add target file size resize option (jpegoptim / convert -define extent)
