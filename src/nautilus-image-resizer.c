@@ -50,7 +50,7 @@ struct _NautilusImageResizerPrivate
 
 	GtkDialog *resize_dialog;
 	GtkCheckButton *default_size_radiobutton;
-	GtkComboBoxText *size_combobox;
+	GtkDropDown *size_combobox;
 	GtkCheckButton *custom_pct_radiobutton;
 	GtkSpinButton *pct_spinbutton;
 	GtkCheckButton *custom_size_radiobutton;
@@ -66,7 +66,7 @@ struct _NautilusImageResizerPrivate
 
 	GtkCheckButton *target_size_radiobutton;
 	GtkSpinButton *target_size_spinbutton;
-	GtkComboBoxText *target_size_unit_combobox;
+	GtkDropDown *target_size_unit_combobox;
 	GtkCheckButton *pad_target_size_checkbutton;
 
 	gint target_size_kb;
@@ -692,9 +692,12 @@ nautilus_image_resizer_response_cb(GtkDialog *dialog, gint response_id, gpointer
 
 		if (gtk_check_button_get_active(priv->default_size_radiobutton))
 		{
-			priv->size =
-				gtk_combo_box_text_get_active_text(
-					GTK_COMBO_BOX_TEXT(priv->size_combobox));
+			GtkStringObject *item =
+				GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(priv->size_combobox));
+			if (item != NULL)
+			{
+				priv->size = g_strdup(gtk_string_object_get_string(item));
+			}
 		}
 		else if (gtk_check_button_get_active(priv->custom_pct_radiobutton))
 		{
@@ -714,9 +717,8 @@ nautilus_image_resizer_response_cb(GtkDialog *dialog, gint response_id, gpointer
 			gint size_val =
 				gtk_spin_button_get_value_as_int(priv->target_size_spinbutton);
 
-			gint active_unit =
-				gtk_combo_box_get_active(
-					GTK_COMBO_BOX(priv->target_size_unit_combobox));
+			guint active_unit =
+				gtk_drop_down_get_selected(priv->target_size_unit_combobox);
 
 			/* KB = index 0, MB = index 1 (using base 1000 to match GNOME/Nautilus SI formatting) */
 			priv->target_size_kb =
@@ -765,7 +767,7 @@ nautilus_image_resizer_init(NautilusImageResizer *resizer)
 	priv->resize_dialog = GTK_DIALOG(gtk_builder_get_object(ui, "resize_dialog"));
 	priv->default_size_radiobutton =
 		GTK_CHECK_BUTTON(gtk_builder_get_object(ui, "default_size_radiobutton"));
-	priv->size_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(ui, "comboboxtext_size"));
+	priv->size_combobox = GTK_DROP_DOWN(gtk_builder_get_object(ui, "comboboxtext_size"));
 	priv->custom_pct_radiobutton =
 		GTK_CHECK_BUTTON(gtk_builder_get_object(ui, "custom_pct_radiobutton"));
 	priv->pct_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(ui, "pct_spinbutton"));
@@ -790,10 +792,8 @@ nautilus_image_resizer_init(NautilusImageResizer *resizer)
 		GTK_SPIN_BUTTON(gtk_builder_get_object(ui, "target_size_spinbutton"));
 
 	priv->target_size_unit_combobox =
-		GTK_COMBO_BOX_TEXT(gtk_builder_get_object(ui, "target_size_unit_combobox"));
-	gtk_combo_box_set_active(
-		GTK_COMBO_BOX(priv->target_size_unit_combobox),
-		0);
+		GTK_DROP_DOWN(gtk_builder_get_object(ui, "target_size_unit_combobox"));
+	gtk_drop_down_set_selected(priv->target_size_unit_combobox, 0);
 
 	priv->pad_target_size_checkbutton =
 		GTK_CHECK_BUTTON(gtk_builder_get_object(ui, "pad_target_size_checkbutton"));
