@@ -26,8 +26,10 @@
 #include "nautilus-image-resizer.h"
 
 #include <string.h>
+#include <math.h>
 
 #include <glib/gi18n.h>
+#include <glib/gstdio.h>
 #include <gio/gio.h>
 #include <gtk/gtk.h>
 
@@ -65,9 +67,11 @@ struct _NautilusImageResizerPrivate
 	GtkCheckButton *target_size_radiobutton;
 	GtkSpinButton *target_size_spinbutton;
 	GtkComboBoxText *target_size_unit_combobox;
+	GtkCheckButton *pad_target_size_checkbutton;
 
 	gint target_size_kb;
 	gboolean use_target_size;
+	gboolean pad_target_size;
 
 	/* Scratch path that the (possibly multi-write) target-size tool writes
 	 * to. We only ever rename FROM this scratch path ONTO the path Nautilus
@@ -268,6 +272,37 @@ retry_dialog_cb(GtkDialog *dialog,
 }
 
 static void
+pad_file_to_target_size(const gchar *filepath, gint target_size_kb)
+{
+	if (filepath == NULL || target_size_kb <= 0)
+		return;
+
+	GStatBuf st;
+	if (g_stat(filepath, &st) == 0)
+	{
+		goffset target_bytes = (goffset)target_size_kb * 1000;
+		if (st.st_size < target_bytes)
+		{
+			goffset pad_needed = target_bytes - st.st_size;
+			FILE *f = g_fopen(filepath, "ab");
+			if (f != NULL)
+			{
+				char buffer[4096] = {0};
+				while (pad_needed > 0)
+				{
+					size_t to_write = (pad_needed > sizeof(buffer)) ? sizeof(buffer) : (size_t)pad_needed;
+					size_t written = fwrite(buffer, 1, to_write, f);
+					if (written == 0)
+						break;
+					pad_needed -= written;
+				}
+				fclose(f);
+			}
+		}
+	}
+}
+
+static void
 op_finished(GPid pid, gint status, gpointer data)
 {
 	NautilusImageResizer *resizer = NAUTILUS_IMAGE_RESIZER(data);
@@ -299,6 +334,20 @@ op_finished(GPid pid, gint status, gpointer data)
 	{
 		GFile *orig_location = nautilus_file_info_get_location(file);
 		GFile *new_location = nautilus_image_resizer_transform_filename(resizer, orig_location);
+
+		if (priv->use_target_size && priv->pad_target_size)
+		{
+			if (priv->scratch_filename != NULL)
+			{
+				pad_file_to_target_size(priv->scratch_filename, priv->target_size_kb);
+			}
+			else
+			{
+				char *new_filename = g_file_get_path(new_location);
+				pad_file_to_target_size(new_filename, priv->target_size_kb);
+				g_free(new_filename);
+			}
+		}
 
 		if (priv->scratch_filename != NULL)
 		{
@@ -384,22 +433,20 @@ run_op(NautilusImageResizer *resizer)
 	{
 		gchar *mime_type = nautilus_file_info_get_mime_type(file);
 		gchar *jpegoptim_path = g_find_program_in_path("jpegoptim");
+		gchar *pngquant_path = g_find_program_in_path("pngquant");
 
 		gboolean jpegoptim_available = (jpegoptim_path != NULL);
+		gboolean pngquant_available = (pngquant_path != NULL);
 		g_free(jpegoptim_path);
+		g_free(pngquant_path);
 
-		/* Both jpegoptim --size and convert -define extent converge on a
-		 * target size by writing their output file multiple times in quick
-		 * succession (trying different quality levels). If that output path
-		 * were new_filename directly, Nautilus's file monitor can end up
-		 * coalescing/rate-limiting those rapid writes and showing stale
-		 * cached size/mtime until a manual refresh (F5). So we always point
-		 * these tools at a private scratch path instead; op_finished() does
-		 * a single clean atomic rename from scratch onto new_filename only
-		 * after the external process has fully exited. */
+		/* Both jpegoptim/pngquant and convert write their output to a
+		 * private scratch path instead; op_finished() does a single clean
+		 * atomic rename from scratch onto new_filename only after the
+		 * external process has fully exited. */
 		priv->scratch_filename = build_scratch_filename(new_filename);
 
-		if (g_strcmp0(mime_type, "image/jpeg") == 0 &&
+		if ((g_strcmp0(mime_type, "image/jpeg") == 0 || g_strcmp0(mime_type, "image/pjpeg") == 0) &&
 			jpegoptim_available)
 		{
 			gchar *size_arg =
@@ -411,7 +458,7 @@ run_op(NautilusImageResizer *resizer)
 			gchar *command =
 				g_strdup_printf(
 					"cp %s %s && "
-					"/usr/bin/jpegoptim %s %s",
+					"(jpegoptim %s %s || true)",
 					filename_q,
 					scratch_q,
 					size_arg,
@@ -437,18 +484,10 @@ run_op(NautilusImageResizer *resizer)
 			g_free(command);
 			g_free(size_arg);
 		}
-		else if (g_strcmp0(mime_type, "image/jpeg") == 0 ||
-				 g_strcmp0(mime_type, "image/png") == 0)
+		else if (g_strcmp0(mime_type, "image/jpeg") == 0 || g_strcmp0(mime_type, "image/pjpeg") == 0)
 		{
-			/* Use the correct ImageMagick -define key for the actual
-			 * mime type. Hardcoding "jpeg:extent" here meant PNG target-size
-			 * compression was silently a no-op (convert just ignores an
-			 * irrelevant -define key), which is also part of what made the
-			 * refresh behaviour look broken/inconsistent. */
 			gchar *define_arg =
-				g_strdup_printf("%s:extent=%dkb",
-								g_strcmp0(mime_type, "image/png") == 0 ? "png" : "jpeg",
-								priv->target_size_kb);
+				g_strdup_printf("jpeg:extent=%dkb", priv->target_size_kb);
 
 			argv[0] = "/usr/bin/convert";
 			argv[1] = filename;
@@ -461,13 +500,91 @@ run_op(NautilusImageResizer *resizer)
 				g_spawn_async(NULL,
 							  argv,
 							  NULL,
-							  G_SPAWN_DO_NOT_REAP_CHILD,
+							  G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_SEARCH_PATH,
 							  NULL,
 							  NULL,
 							  &pid,
 							  NULL);
 
 			g_free(define_arg);
+		}
+		else if (g_strcmp0(mime_type, "image/png") == 0)
+		{
+			GStatBuf st;
+			goffset file_size_bytes = 0;
+			if (g_stat(filename, &st) == 0)
+			{
+				file_size_bytes = st.st_size;
+			}
+
+			gint orig_size_kb = (gint)(file_size_bytes / 1000);
+			if (orig_size_kb <= 0) orig_size_kb = 1;
+
+			gint ratio = (priv->target_size_kb * 100) / orig_size_kb;
+
+			gchar *filename_q = g_shell_quote(filename);
+			gchar *scratch_q = g_shell_quote(priv->scratch_filename);
+			gchar *command = NULL;
+
+			if (pngquant_available)
+			{
+				if (ratio >= 100)
+				{
+					/* Target size is larger than original: minimal/lossless touch */
+					command = g_strdup_printf(
+						"pngquant --quality=85-100 --strip --force --output %s %s || cp %s %s",
+						scratch_q, filename_q, filename_q, scratch_q);
+				}
+				else if (ratio >= 65)
+				{
+					/* Light reduction: high quality palette quantization */
+					command = g_strdup_printf(
+						"pngquant --quality=60-90 --strip --force --output %s %s || cp %s %s",
+						scratch_q, filename_q, filename_q, scratch_q);
+				}
+				else if (ratio >= 30)
+				{
+					/* Medium reduction: dynamic quality mapping */
+					gint max_q = CLAMP(ratio + 10, 30, 75);
+					gint min_q = CLAMP(max_q - 25, 15, 50);
+					command = g_strdup_printf(
+						"pngquant --quality=%d-%d --strip --force --output %s %s || cp %s %s",
+						min_q, max_q, scratch_q, filename_q, filename_q, scratch_q);
+				}
+				else
+				{
+					/* Heavy reduction: maximum palette quantization without modifying resolution */
+					command = g_strdup_printf(
+						"pngquant --quality=10-35 --strip --force --output %s %s || cp %s %s",
+						scratch_q, filename_q, filename_q, scratch_q);
+				}
+			}
+			else
+			{
+				/* Fallback when pngquant is not installed: 8-bit palette conversion (preserves resolution) */
+				command = g_strdup_printf(
+					"/usr/bin/convert %s -strip PNG8:%s || cp %s %s",
+					filename_q, scratch_q, filename_q, scratch_q);
+			}
+
+			argv[0] = "/bin/sh";
+			argv[1] = "-c";
+			argv[2] = command;
+			argv[3] = NULL;
+
+			spawn_success =
+				g_spawn_async(NULL,
+							  argv,
+							  NULL,
+							  G_SPAWN_DO_NOT_REAP_CHILD,
+							  NULL,
+							  NULL,
+							  &pid,
+							  NULL);
+
+			g_free(filename_q);
+			g_free(scratch_q);
+			g_free(command);
 		}
 		else
 		{
@@ -541,6 +658,7 @@ nautilus_image_resizer_response_cb(GtkDialog *dialog, gint response_id, gpointer
 	{
 		/* Reset operation-specific state */
 		priv->use_target_size = FALSE;
+		priv->pad_target_size = FALSE;
 
 		g_clear_pointer(&priv->suffix, g_free);
 		g_clear_pointer(&priv->size, g_free);
@@ -600,9 +718,12 @@ nautilus_image_resizer_response_cb(GtkDialog *dialog, gint response_id, gpointer
 				gtk_combo_box_get_active(
 					GTK_COMBO_BOX(priv->target_size_unit_combobox));
 
-			/* KB = index 0, MB = index 1 */
+			/* KB = index 0, MB = index 1 (using base 1000 to match GNOME/Nautilus SI formatting) */
 			priv->target_size_kb =
-				(active_unit == 1) ? size_val * 1024 : size_val;
+				(active_unit == 1) ? size_val * 1000 : size_val;
+
+			priv->pad_target_size =
+				gtk_check_button_get_active(priv->pad_target_size_checkbutton);
 
 			priv->use_target_size = TRUE;
 		}
@@ -673,10 +794,41 @@ nautilus_image_resizer_init(NautilusImageResizer *resizer)
 	gtk_combo_box_set_active(
 		GTK_COMBO_BOX(priv->target_size_unit_combobox),
 		0);
+
+	priv->pad_target_size_checkbutton =
+		GTK_CHECK_BUTTON(gtk_builder_get_object(ui, "pad_target_size_checkbutton"));
+
+	/* Bind input sensitivity to their respective radio buttons */
+	g_object_bind_property(priv->default_size_radiobutton, "active",
+						   priv->size_combobox, "sensitive",
+						   G_BINDING_SYNC_CREATE);
+	g_object_bind_property(priv->custom_pct_radiobutton, "active",
+						   priv->pct_spinbutton, "sensitive",
+						   G_BINDING_SYNC_CREATE);
+	g_object_bind_property(priv->custom_size_radiobutton, "active",
+						   priv->width_spinbutton, "sensitive",
+						   G_BINDING_SYNC_CREATE);
+	g_object_bind_property(priv->custom_size_radiobutton, "active",
+						   priv->height_spinbutton, "sensitive",
+						   G_BINDING_SYNC_CREATE);
+	g_object_bind_property(priv->target_size_radiobutton, "active",
+						   priv->target_size_spinbutton, "sensitive",
+						   G_BINDING_SYNC_CREATE);
+	g_object_bind_property(priv->target_size_radiobutton, "active",
+						   priv->target_size_unit_combobox, "sensitive",
+						   G_BINDING_SYNC_CREATE);
+	g_object_bind_property(priv->target_size_radiobutton, "active",
+						   priv->pad_target_size_checkbutton, "sensitive",
+						   G_BINDING_SYNC_CREATE);
+	g_object_bind_property(priv->append_radiobutton, "active",
+						   priv->name_entry, "sensitive",
+						   G_BINDING_SYNC_CREATE);
+
 	gtk_box_append(GTK_BOX(progress_box), priv->progress_bar);
 	gtk_box_append(GTK_BOX(progress_box), priv->progress_label);
 	priv->target_size_kb = 50;
 	priv->use_target_size = FALSE;
+	priv->pad_target_size = FALSE;
 	priv->scratch_filename = NULL;
 	/* Connect signal */
 	g_signal_connect(G_OBJECT(priv->resize_dialog), "response",
