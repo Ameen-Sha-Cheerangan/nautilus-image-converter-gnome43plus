@@ -1,10 +1,18 @@
-Version x.x.x
+Version 0.5.0
+=============
+General
+		* Add resize-to-target-file-size option for JPEG/PNG (via jpegoptim / ImageMagick)
+        * Add target file size compression option for JPEG/PNG (Ameen Sha C)
+        * Add zero-byte padding option for strict file size limits
+        * Strictly preserve original image resolution during target-size compression
+        * Align target size units to decimal base-1000 standard
+
+Version 0.4.0
 =============
 General
         * Port to Gtk3/GNOME3
         * Fix distcheck so that it works without root privileges
         * Enable silent build
-		* Add resize-to-target-file-size option for JPEG/PNG (via jpegoptim / ImageMagick)
 
 Translators
         * Yaron Shahrabani (he)
