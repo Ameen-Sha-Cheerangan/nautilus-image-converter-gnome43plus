@@ -54,16 +54,20 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkComboBoxText" id="format_combobox">
+                          <object class="GtkDropDown" id="format_combobox">
                             <property name="hexpand">1</property>
-                            <property name="active">0</property>
-                            <items>
-                              <item id="webp" translatable="yes">WebP (.webp)</item>
-                              <item id="png" translatable="yes">PNG (.png)</item>
-                              <item id="jpg" translatable="yes">JPEG (.jpg)</item>
-                              <item id="avif" translatable="yes">AVIF (.avif)</item>
-                              <item id="gif" translatable="yes">GIF (.gif)</item>
-                            </items>
+                            <property name="selected">0</property>
+                            <property name="model">
+                              <object class="GtkStringList">
+                                <items>
+                                  <item translatable="yes">WebP (.webp)</item>
+                                  <item translatable="yes">PNG (.png)</item>
+                                  <item translatable="yes">JPEG (.jpg)</item>
+                                  <item translatable="yes">AVIF (.avif)</item>
+                                  <item translatable="yes">GIF (.gif)</item>
+                                </items>
+                              </object>
+                            </property>
                           </object>
                         </child>
                       </object>
