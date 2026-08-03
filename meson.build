@@ -11,6 +11,9 @@ gtk = dependency('gtk4', version: '>= 4.6.0')
 glib = dependency('glib-2.0', version: '>= 2.28.0')
 libnautilus_extension = dependency ('libnautilus-extension-4', version: '>= 43.rc')
 
+cc = meson.get_compiler('c')
+m_dep = cc.find_library('m', required: false)
+
 nautilus_extension_dir = libnautilus_extension.get_pkgconfig_variable('extensiondir')
 prefix_dir = get_option('prefix')
 data_dir = prefix_dir / get_option('datadir')
