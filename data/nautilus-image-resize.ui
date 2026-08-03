@@ -83,16 +83,20 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkComboBoxText" id="comboboxtext_size">
+                          <object class="GtkDropDown" id="comboboxtext_size">
                             <property name="hexpand">1</property>
-                            <items>
-                              <item translatable="yes">96x96</item>
-                              <item translatable="yes">128x128</item>
-                              <item translatable="yes">640x480</item>
-                              <item translatable="yes">800x600</item>
-                              <item translatable="yes">1024x768</item>
-                              <item translatable="yes">1280x960</item>
-                            </items>
+                            <property name="model">
+                              <object class="GtkStringList">
+                                <items>
+                                  <item translatable="yes">96x96</item>
+                                  <item translatable="yes">128x128</item>
+                                  <item translatable="yes">640x480</item>
+                                  <item translatable="yes">800x600</item>
+                                  <item translatable="yes">1024x768</item>
+                                  <item translatable="yes">1280x960</item>
+                                </items>
+                              </object>
+                            </property>
                           </object>
                         </child>
                         <child>
@@ -202,12 +206,16 @@
                       </child>
 
                       <child>
-                        <object class="GtkComboBoxText" id="target_size_unit_combobox">
-                          <property name="active">0</property>
-                          <items>
-                            <item>KB</item>
-                            <item>MB</item>
-                          </items>
+                        <object class="GtkDropDown" id="target_size_unit_combobox">
+                          <property name="selected">0</property>
+                          <property name="model">
+                            <object class="GtkStringList">
+                              <items>
+                                <item>KB</item>
+                                <item>MB</item>
+                              </items>
+                            </object>
+                          </property>
                         </object>
                       </child>
 
