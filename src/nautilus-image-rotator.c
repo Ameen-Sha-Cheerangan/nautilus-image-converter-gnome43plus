@@ -48,7 +48,7 @@ struct _NautilusImageRotatorPrivate {
 
 	GtkDialog *rotate_dialog;
 	GtkCheckButton *default_angle_radiobutton;
-	GtkComboBox *angle_combobox;
+	GtkDropDown *angle_combobox;
 	GtkCheckButton *custom_angle_radiobutton;
 	GtkSpinButton *angle_spinbutton;
 	GtkCheckButton *append_radiobutton;
@@ -328,7 +328,7 @@ nautilus_image_rotator_response_cb (GtkDialog *dialog, gint response_id, gpointe
 			priv->suffix = g_strdup (gtk_editable_get_text (GTK_EDITABLE (priv->name_entry)));
 		}
 		if (gtk_check_button_get_active (priv->default_angle_radiobutton)) {
-			switch (gtk_combo_box_get_active (GTK_COMBO_BOX (priv->angle_combobox))) {
+			switch (gtk_drop_down_get_selected (priv->angle_combobox)) {
 			case 0:
 				priv->angle = g_strdup_printf ("90");
 				break;
@@ -383,7 +383,7 @@ nautilus_image_rotator_init(NautilusImageRotator *rotator)
 	priv->rotate_dialog = GTK_DIALOG (gtk_builder_get_object (ui, "rotate_dialog"));
 	priv->default_angle_radiobutton =
 		GTK_CHECK_BUTTON (gtk_builder_get_object (ui, "default_angle_radiobutton"));
-	priv->angle_combobox = GTK_COMBO_BOX (gtk_builder_get_object (ui, "angle_combobox"));
+	priv->angle_combobox = GTK_DROP_DOWN (gtk_builder_get_object (ui, "angle_combobox"));
 	priv->custom_angle_radiobutton =
 		GTK_CHECK_BUTTON (gtk_builder_get_object (ui, "custom_angle_radiobutton"));
 	priv->angle_spinbutton =
@@ -394,8 +394,19 @@ nautilus_image_rotator_init(NautilusImageRotator *rotator)
 	priv->inplace_radiobutton =
 		GTK_CHECK_BUTTON (gtk_builder_get_object (ui, "inplace_radiobutton"));
 
-	/* Set default value for combobox */
-	gtk_combo_box_set_active  (priv->angle_combobox, 0); /* 90° clockwise */
+	/* Set default value for dropdown */
+	gtk_drop_down_set_selected (priv->angle_combobox, 0); /* 90° clockwise */
+
+	/* Bind input sensitivity to their respective radio buttons */
+	g_object_bind_property (priv->default_angle_radiobutton, "active",
+	                        priv->angle_combobox, "sensitive",
+	                        G_BINDING_SYNC_CREATE);
+	g_object_bind_property (priv->custom_angle_radiobutton, "active",
+	                        priv->angle_spinbutton, "sensitive",
+	                        G_BINDING_SYNC_CREATE);
+	g_object_bind_property (priv->append_radiobutton, "active",
+	                        priv->name_entry, "sensitive",
+	                        G_BINDING_SYNC_CREATE);
 
 	priv->progress_dialog = gtk_window_new ();
 	gtk_window_set_title (GTK_WINDOW (priv->progress_dialog), _("Rotating…"));
