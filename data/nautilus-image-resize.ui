@@ -187,6 +187,7 @@
                         <object class="GtkCheckButton" id="target_size_radiobutton">
                           <property name="halign">center</property>
                           <property name="label" translatable="1">Target size (approx.):</property>
+                          <property name="tooltip-text" translatable="1">Compress images to approximately hit a target file size in KB or MB.</property>
                           <property name="use_underline">1</property>
                           <property name="group">default_size_radiobutton</property>
                         </object>
@@ -210,6 +211,19 @@
                         </object>
                       </child>
 
+                    </object>
+                  </child>
+                  <child>
+                    <object class="GtkBox" id="hbox_pad_target_size">
+                      <property name="spacing">6</property>
+                      <property name="margin-start">24</property>
+                      <child>
+                        <object class="GtkCheckButton" id="pad_target_size_checkbutton">
+                          <property name="label" translatable="1">Pad with dummy bytes if smaller than target</property>
+                          <property name="tooltip-text" translatable="1">Append dummy zero-bytes if the compressed image is smaller than the target size (useful for strict portals that mandate a minimum file size).</property>
+                          <property name="use_underline">1</property>
+                        </object>
+                      </child>
                     </object>
                   </child>
                   </object>
