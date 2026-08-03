@@ -98,4 +98,4 @@ You can support directly via any UPI app (GPay, PhonePe, Paytm) using the QR cod
 
 ## 📜 Credits & Acknowledgments
 
-This project is a fork of the original [nautilus-image-converter](https://gitlab.gnome.org/coreyberla/nautilus-image-converter). Huge thanks to **Corey Berla** and all previous contributors for building the fantastic foundation of this tool!
+This project is a fork of [Corey Berla's repository](https://gitlab.gnome.org/coreyberla/nautilus-image-converter), which ported the original extension created by **Jürg Billeter** ([GNOME Archive](https://gitlab.gnome.org/Archive/nautilus-image-converter)) to GTK4 and Meson.
