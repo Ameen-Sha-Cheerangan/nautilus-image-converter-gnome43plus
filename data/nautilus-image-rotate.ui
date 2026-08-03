@@ -9,22 +9,6 @@
     <property name="page_size">45</property>
     <property name="value">90</property>
   </object>
-  <object class="GtkListStore" id="model1">
-    <columns>
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0">90° clockwise</col>
-      </row>
-      <row>
-        <col id="0">90° counter-clockwise</col>
-      </row>
-      <row>
-        <col id="0">180°</col>
-      </row>
-    </data>
-  </object>
   <object class="GtkDialog" id="rotate_dialog">
     <property name="margin-top">12</property>
     <property name="margin-bottom">12</property>
@@ -79,14 +63,17 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkComboBox" id="angle_combobox">
-                            <property name="model">model1</property>
-                            <child>
-                              <object class="GtkCellRendererText" id="renderer1"/>
-                              <attributes>
-                                <attribute name="text">0</attribute>
-                              </attributes>
-                            </child>
+                          <object class="GtkDropDown" id="angle_combobox">
+                            <property name="selected">0</property>
+                            <property name="model">
+                              <object class="GtkStringList">
+                                <items>
+                                  <item translatable="yes">90° clockwise</item>
+                                  <item translatable="yes">90° counter-clockwise</item>
+                                  <item translatable="yes">180°</item>
+                                </items>
+                              </object>
+                            </property>
                           </object>
                         </child>
                       </object>
