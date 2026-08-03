@@ -46,7 +46,7 @@ struct _NautilusImageFormatChangerPrivate
 	int images_total;
 
 	GtkDialog *format_dialog;
-	GtkComboBoxText *format_combobox;
+	GtkDropDown *format_combobox;
 	GtkCheckButton *append_radiobutton;
 	GtkEntry *name_entry;
 	GtkCheckButton *delete_orig_radiobutton;
@@ -338,10 +338,11 @@ nautilus_image_format_changer_response_cb(GtkDialog *dialog, gint response_id, g
 		g_clear_pointer(&priv->suffix, g_free);
 		g_clear_pointer(&priv->target_ext, g_free);
 
-		const gchar *active_id = gtk_combo_box_get_active_id(GTK_COMBO_BOX(priv->format_combobox));
-		if (active_id != NULL)
+		guint selected_idx = gtk_drop_down_get_selected(priv->format_combobox);
+		const gchar *exts[] = {"webp", "png", "jpg", "avif", "gif"};
+		if (selected_idx < G_N_ELEMENTS(exts))
 		{
-			priv->target_ext = g_strdup(active_id);
+			priv->target_ext = g_strdup(exts[selected_idx]);
 		}
 		else
 		{
@@ -391,10 +392,15 @@ nautilus_image_format_changer_init(NautilusImageFormatChanger *changer)
 	}
 
 	priv->format_dialog = GTK_DIALOG(gtk_builder_get_object(ui, "format_dialog"));
-	priv->format_combobox = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(ui, "format_combobox"));
+	priv->format_combobox = GTK_DROP_DOWN(gtk_builder_get_object(ui, "format_combobox"));
+	gtk_drop_down_set_selected(priv->format_combobox, 0);
 	priv->append_radiobutton = GTK_CHECK_BUTTON(gtk_builder_get_object(ui, "append_radiobutton"));
 	priv->name_entry = GTK_ENTRY(gtk_builder_get_object(ui, "name_entry"));
 	priv->delete_orig_radiobutton = GTK_CHECK_BUTTON(gtk_builder_get_object(ui, "delete_orig_radiobutton"));
+
+	g_object_bind_property(priv->append_radiobutton, "active",
+	                       priv->name_entry, "sensitive",
+	                       G_BINDING_SYNC_CREATE);
 
 	priv->progress_dialog = gtk_window_new();
 	gtk_window_set_title(GTK_WINDOW(priv->progress_dialog), _("Converting…"));
