@@ -1,13 +1,15 @@
 # Nautilus Image Converter (Enhanced)
 
-The **Nautilus-Image-Converter** extension allows you to resize and rotate images directly from the right-click context menu in the Nautilus (GNOME Files) file manager.
+The **Nautilus-Image-Converter** extension allows you to resize, rotate, and convert images between formats directly from the right-click context menu in the Nautilus (GNOME Files) file manager.
 
 This repository is an enhanced fork of the original extension, featuring new improvements to make image manipulation even easier for modern workflows.
 
 ## ✨ New in this Fork
-* **Target File Size Compression:** You can now compress and resize images to match a specific target file size (e.g., 500KB, 2MB). This is perfect for optimizing images for web uploads, email attachments, or strict size limits without having to guess the correct quality settings.
 
-
+* **🔄 Convert Image Format:** Convert images between **WebP, PNG, JPEG, AVIF, and GIF** formats with a single right-click. Optionally append a suffix to the new filename or delete the original after conversion.
+* **📦 Target File Size Compression/Upscaling:** Adjust images to match a specific target file size (e.g., 500KB, 2MB). Compresses larger files down by adjusting quality only (resolution is never downscaled), and optionally pads smaller files up with dummy bytes to hit the exact target — perfect for web uploads, email attachments, or portals with strict size limits. Uses `jpegoptim` for JPEG and `pngquant` for PNG when available, with ImageMagick as a fallback.
+* **📏 SI-Aligned Size Units:** Target size units use decimal base-1000 (KB/MB), matching GNOME/Nautilus file size display conventions.
+* **🎨 Modern GTK4 Widgets:** All dropdowns upgraded from legacy `GtkComboBoxText` to native `GtkDropDown`, fixing focus-stealing issues and aligning with modern GTK4 design.
 
 ## Core Features (from Original Project)
 
@@ -18,7 +20,9 @@ All the original features of the `nautilus-image-converter` are fully intact:
 * **Rotate Images:** Rotate 90°, 180°, or by a custom angle.
 * **In-Place or New File:** Choose to overwrite your original images or create new copies (e.g., `image.resized.jpg`).
 
-<img src="images/SS3.png" width="19%"> <img src="images/SS1.png" width="39%"> <img src="images/SS2.png" width="39%">
+<img src="images/SS3.png" width="19%"> <img src="images/SS1.png" width="39%">
+<br/>
+<img src="images/SS2.png" width="39%"> <img src="images/SS4.png" width="39%">
 
 
 ## 📥 Installation
@@ -27,11 +31,11 @@ To build and install the extension from source, run the following commands:
 
 ```bash
 # 1. Install dependencies (Ubuntu/Debian example)
-sudo apt install libgtk-4-dev libnautilus-extension4 libnautilus-extension-dev gettext jpegoptim meson ninja-build
+sudo apt install libgtk-4-dev libnautilus-extension4 libnautilus-extension-dev gettext jpegoptim meson ninja-build imagemagick pngquant
 
 # 2. Clone this repository
-git clone https://github.com/Ameen-Sha-Cheerangan/nautilus-image-converter.git
-cd nautilus-image-converter
+git clone https://github.com/Ameen-Sha-Cheerangan/nautilus-image-converter-gnome43plus.git
+cd nautilus-image-converter-gnome43plus
 
 # 3. Build the project
 meson build
@@ -57,9 +61,9 @@ sudo ninja uninstall -C build
 
 ## 🕰️ Older GNOME Versions (GNOME < 43)
 
-Are you using an older version of GNOME (e.g., Ubuntu 22.04 or earlier)? This repository requires GNOME 43+ and GTK4. 
+Are you using an older version of GNOME (e.g., Ubuntu 22.04 or earlier)? This repository requires GNOME 43+ and GTK4.
 
-For older systems, please use the **[Legacy Version](https://github.com/Ameen-Sha-Cheerangan/nautilus-image-converter-legacy)** which also includes the new Target File Size feature!
+For older systems, please use the **[Legacy Version](https://github.com/Ameen-Sha-Cheerangan/nautilus-image-converter-legacy)** which includes the Target File Size feature, but some features might be missing (note: Format Conversion is only available in this GTK4 version).
 
 ## 🤝 Contributing
 
@@ -68,7 +72,6 @@ Patches, bug reports, and feature requests are always welcome! Feel free to open
 ## ⭐ Show Your Support
 
 If you found this extension helpful, please consider giving this repository a star on GitHub! It helps others find the project.
-
 
 ## ☕ Support the Developer
 
