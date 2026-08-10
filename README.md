@@ -77,14 +77,14 @@ If you found this extension helpful, please consider giving this repository a st
 
 If this tool helped you, consider supporting its developer!
 
-### 🌐 International Users
+### 🌐 International
 You can support me instantly via **Ko-fi**.
 
 <a href="https://ko-fi.com/ameen_sha" target="_blank">
   <img src="https://storage.ko-fi.com/cdn/brandasset/kofi_button_blue.png" alt="Buy Me a Coffee at ko-fi.com" height="36" />
 </a>
 
-### 🇮🇳 Users in India (UPI)
+### 🇮🇳 India
 You can support directly via any UPI app (GPay, PhonePe, Paytm) using the QR code or ID below:
 
 <div align="center">
