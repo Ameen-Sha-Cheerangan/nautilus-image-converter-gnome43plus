@@ -73,9 +73,11 @@ Patches, bug reports, and feature requests are always welcome! Feel free to open
 
 If you found this extension helpful, please consider giving this repository a star on GitHub! It helps others find the project.
 
-## ☕ Support the Developer
 
-If this tool helped you, consider supporting its developer!
+
+## ☕ Support the developer
+
+If this tool helped you, consider supporting its development!
 
 ### 🌐 International
 You can support me instantly via **Ko-fi**.
@@ -84,14 +86,16 @@ You can support me instantly via **Ko-fi**.
   <img src="https://storage.ko-fi.com/cdn/brandasset/kofi_button_blue.png" alt="Buy Me a Coffee at ko-fi.com" height="36" />
 </a>
 
-### 🇮🇳 India
+### 🇮🇳 India (UPI)
 You can support directly via any UPI app (GPay, PhonePe, Paytm) using the QR code or ID below:
-
+<details>
+  <summary>View UPI payment options</summary>
 <div align="center">
   <img src="https://raw.githubusercontent.com/Ameen-Sha-Cheerangan/.github/main/assets/upi-qr.jpg" alt="UPI QR Code" width="220"/>
   <br/>
   <b>UPI ID:</b> <code>ameenshahcheerangan-1@okicici</code>
 </div>
+</details>
 
 <br/>
 
