@@ -6,7 +6,8 @@ This repository is an enhanced fork of the original extension, featuring new imp
 
 ## ✨ New in this Fork
 
-* **🔄 Convert Image Format:** Convert images between **WebP, PNG, JPEG, AVIF, and GIF** formats with a single right-click. Optionally append a suffix to the new filename or delete the original after conversion.
+* **🔄 Convert Image Format:** Convert images between **WebP, PNG, JPEG, AVIF, GIF, and PDF** formats with a single right-click. Optionally append a suffix to the new filename or delete the original after conversion.
+* **📄 Combine to PDF:** Easily select multiple images and combine them into a single, smartly-named PDF document (`image1_to_image3.pdf`).
 * **📦 Target File Size Compression/Upscaling:** Adjust images to match a specific target file size (e.g., 500KB, 2MB). Compresses larger files down by adjusting quality only (resolution is never downscaled), and optionally pads smaller files up with dummy bytes to hit the exact target — perfect for web uploads, email attachments, or portals with strict size limits. Uses `jpegoptim` for JPEG and `pngquant` for PNG when available, with ImageMagick as a fallback.
 * **📏 SI-Aligned Size Units:** Target size units use decimal base-1000 (KB/MB), matching GNOME/Nautilus file size display conventions.
 * **🎨 Modern GTK4 Widgets:** All dropdowns upgraded from legacy `GtkComboBoxText` to native `GtkDropDown`, fixing focus-stealing issues and aligning with modern GTK4 design.
