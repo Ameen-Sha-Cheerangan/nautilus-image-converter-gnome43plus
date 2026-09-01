@@ -50,6 +50,7 @@ struct _NautilusImageFormatChangerPrivate
 	GtkCheckButton *append_radiobutton;
 	GtkEntry *name_entry;
 	GtkCheckButton *delete_orig_radiobutton;
+	GtkCheckButton *combine_pdf_checkbutton;
 
 	GtkWidget *progress_dialog;
 	GtkWidget *progress_bar;
@@ -325,6 +326,105 @@ run_op(NautilusImageFormatChanger *changer)
 	gtk_label_set_markup(GTK_LABEL(priv->progress_label), tmp);
 	g_free(tmp);
 }
+static void
+combine_op_finished(GPid pid, gint status, gpointer data)
+{
+	NautilusImageFormatChanger *changer = NAUTILUS_IMAGE_FORMAT_CHANGER(data);
+	NautilusImageFormatChangerPrivate *priv = nautilus_image_format_changer_get_instance_private(changer);
+
+	if (status != 0)
+	{
+		GtkWidget *msg_dialog = gtk_message_dialog_new(GTK_WINDOW(priv->progress_dialog),
+													   GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR,
+													   GTK_BUTTONS_CLOSE,
+													   _("Failed to combine images into a PDF. Check whether you have permission to write to this folder."));
+
+		g_signal_connect(msg_dialog, "response", G_CALLBACK(gtk_window_destroy), NULL);
+		gtk_widget_show(msg_dialog);
+	}
+	else
+	{
+		gtk_window_destroy(GTK_WINDOW(priv->progress_dialog));
+	}
+}
+
+static void
+run_combine_op(NautilusImageFormatChanger *changer)
+{
+	NautilusImageFormatChangerPrivate *priv =
+		nautilus_image_format_changer_get_instance_private(changer);
+
+	g_return_if_fail(priv->files != NULL);
+
+	NautilusFileInfo *first_file = NAUTILUS_FILE_INFO(priv->files->data);
+	GList *last_node = g_list_last(priv->files);
+	NautilusFileInfo *last_file = NAUTILUS_FILE_INFO(last_node->data);
+
+	char *first_full_name = nautilus_file_info_get_name(first_file);
+	char *first_basename = g_strdup(first_full_name);
+	char *first_ext = strrchr(first_basename, '.');
+	if (first_ext != NULL) first_ext[0] = '\0';
+	g_free(first_full_name);
+
+	char *last_full_name = nautilus_file_info_get_name(last_file);
+	char *last_basename = g_strdup(last_full_name);
+	char *last_ext = strrchr(last_basename, '.');
+	if (last_ext != NULL) last_ext[0] = '\0';
+	g_free(last_full_name);
+
+	char *combined_name = g_strdup_printf("%s_to_%s.pdf", first_basename, last_basename);
+	g_free(first_basename);
+	g_free(last_basename);
+
+	GFile *orig_location = nautilus_file_info_get_location(first_file);
+	GFile *parent_dir = g_file_get_parent(orig_location);
+	g_object_unref(orig_location);
+	
+	GFile *out_location = g_file_get_child(parent_dir, combined_name);
+	g_free(combined_name);
+	g_object_unref(parent_dir);
+	
+	char *out_filename = g_file_get_path(out_location);
+	g_object_unref(out_location);
+
+	int num_files = g_list_length(priv->files);
+	gchar **argv = g_new0(gchar *, num_files + 4);
+	
+	argv[0] = g_strdup("/usr/bin/convert");
+	
+	int i = 1;
+	for (GList *l = priv->files; l != NULL; l = l->next)
+	{
+		NautilusFileInfo *f = NAUTILUS_FILE_INFO(l->data);
+		GFile *loc = nautilus_file_info_get_location(f);
+		argv[i++] = g_file_get_path(loc);
+		g_object_unref(loc);
+	}
+	
+	argv[i++] = g_strdup(out_filename);
+	argv[i] = NULL;
+	
+	g_free(out_filename);
+
+	pid_t pid;
+	gboolean spawn_success =
+		g_spawn_async(NULL, argv, NULL, G_SPAWN_DO_NOT_REAP_CHILD, NULL, NULL, &pid, NULL);
+
+	g_strfreev(argv);
+
+	if (!spawn_success)
+	{
+		g_warning("Failed to spawn conversion command");
+		gtk_window_destroy(GTK_WINDOW(priv->progress_dialog));
+		return;
+	}
+
+	g_child_watch_add(pid, combine_op_finished, changer);
+
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(priv->progress_bar), 1.0);
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(priv->progress_bar), _("Combining images into PDF..."));
+	gtk_label_set_markup(GTK_LABEL(priv->progress_label), _("<i>Please wait...</i>"));
+}
 
 static void
 nautilus_image_format_changer_response_cb(GtkDialog *dialog, gint response_id, gpointer user_data)
@@ -339,7 +439,7 @@ nautilus_image_format_changer_response_cb(GtkDialog *dialog, gint response_id, g
 		g_clear_pointer(&priv->target_ext, g_free);
 
 		guint selected_idx = gtk_drop_down_get_selected(priv->format_combobox);
-		const gchar *exts[] = {"webp", "png", "jpg", "avif", "gif"};
+		const gchar *exts[] = {"webp", "png", "jpg", "avif", "gif", "pdf"};
 		if (selected_idx < G_N_ELEMENTS(exts))
 		{
 			priv->target_ext = g_strdup(exts[selected_idx]);
@@ -361,10 +461,35 @@ nautilus_image_format_changer_response_cb(GtkDialog *dialog, gint response_id, g
 		}
 
 		gtk_widget_show(priv->progress_dialog);
-		run_op(changer);
+		if (gtk_check_button_get_active(priv->combine_pdf_checkbutton))
+		{
+			run_combine_op(changer);
+		}
+		else
+		{
+			run_op(changer);
+		}
 	}
 
 	gtk_window_destroy(GTK_WINDOW(dialog));
+}
+
+static void
+format_combobox_selected_changed_cb(GObject *gobject, GParamSpec *pspec, gpointer user_data)
+{
+	NautilusImageFormatChanger *changer = NAUTILUS_IMAGE_FORMAT_CHANGER(user_data);
+	NautilusImageFormatChangerPrivate *priv = nautilus_image_format_changer_get_instance_private(changer);
+
+	guint selected_idx = gtk_drop_down_get_selected(priv->format_combobox);
+	if (selected_idx == 5 && priv->images_total > 1)
+	{
+		gtk_widget_set_sensitive(GTK_WIDGET(priv->combine_pdf_checkbutton), TRUE);
+	}
+	else
+	{
+		gtk_widget_set_sensitive(GTK_WIDGET(priv->combine_pdf_checkbutton), FALSE);
+		gtk_check_button_set_active(priv->combine_pdf_checkbutton, FALSE);
+	}
 }
 
 static void
@@ -397,6 +522,9 @@ nautilus_image_format_changer_init(NautilusImageFormatChanger *changer)
 	priv->append_radiobutton = GTK_CHECK_BUTTON(gtk_builder_get_object(ui, "append_radiobutton"));
 	priv->name_entry = GTK_ENTRY(gtk_builder_get_object(ui, "name_entry"));
 	priv->delete_orig_radiobutton = GTK_CHECK_BUTTON(gtk_builder_get_object(ui, "delete_orig_radiobutton"));
+	priv->combine_pdf_checkbutton = GTK_CHECK_BUTTON(gtk_builder_get_object(ui, "combine_pdf_checkbutton"));
+
+	g_signal_connect(priv->format_combobox, "notify::selected", G_CALLBACK(format_combobox_selected_changed_cb), changer);
 
 	g_object_bind_property(priv->append_radiobutton, "active",
 	                       priv->name_entry, "sensitive",
@@ -431,6 +559,8 @@ void
 nautilus_image_format_changer_show_dialog(NautilusImageFormatChanger *changer)
 {
 	NautilusImageFormatChangerPrivate *priv = nautilus_image_format_changer_get_instance_private(changer);
+
+	format_combobox_selected_changed_cb(NULL, NULL, changer);
 
 	gtk_widget_show(GTK_WIDGET(priv->format_dialog));
 }

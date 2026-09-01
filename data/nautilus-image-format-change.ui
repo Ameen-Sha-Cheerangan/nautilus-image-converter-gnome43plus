@@ -65,11 +65,19 @@
                                   <item translatable="yes">JPEG (.jpg)</item>
                                   <item translatable="yes">AVIF (.avif)</item>
                                   <item translatable="yes">GIF (.gif)</item>
+                                  <item translatable="yes">PDF (.pdf)</item>
                                 </items>
                               </object>
                             </property>
                           </object>
                         </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="combine_pdf_checkbutton">
+                        <property name="label" translatable="yes">Combine into single PDF document</property>
+                        <property name="use_underline">1</property>
+                        <property name="sensitive">0</property>
                       </object>
                     </child>
                   </object>
