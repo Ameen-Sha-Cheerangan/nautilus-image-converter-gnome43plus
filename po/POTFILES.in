@@ -1,8 +1,5 @@
 [encoding: UTF-8]
 # List of source files which contain translatable strings.
-[type: gettext/glade]data/nautilus-image-resize.ui
-[type: gettext/glade]data/nautilus-image-rotate.ui
-
 src/nautilus-image-converter.c
-src/nautilus-image-resizer.c
-src/nautilus-image-rotator.c
+src/ic-settings.c
+src/ic-dialog.c

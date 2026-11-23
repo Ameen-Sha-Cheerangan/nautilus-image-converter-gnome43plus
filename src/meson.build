@@ -2,14 +2,13 @@ libnautilus_image_converter_sources = [
   'image-converter.c',
   'nautilus-image-converter.c',
   'nautilus-image-converter.h',
-  'nautilus-image-resizer.c',
-  'nautilus-image-resizer.h',
-  'nautilus-image-rotator.c',
-  'nautilus-image-rotator.h',
-  'nautilus-image-format-changer.c',
-  'nautilus-image-format-changer.h',
+  'ic-settings.c',
+  'ic-settings.h',
+  'ic-crop-view.c',
+  'ic-crop-view.h',
+  'ic-dialog.c',
+  'ic-dialog.h',
 ]
-
 
 libnautilus_image_converter_dependencies = [
   glib,

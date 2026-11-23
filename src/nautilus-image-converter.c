@@ -24,9 +24,7 @@
 #include <config.h> /* for GETTEXT_PACKAGE */
 
 #include "nautilus-image-converter.h"
-#include "nautilus-image-resizer.h"
-#include "nautilus-image-rotator.h"
-#include "nautilus-image-format-changer.h"
+#include "ic-dialog.h"
 
 #include <nautilus-extension.h>
 
@@ -80,27 +78,20 @@ image_converter_filter_images (GList *files)
 }
 
 static void
-image_resize_callback (NautilusMenuItem *item,
+image_convert_callback (NautilusMenuItem *item,
 			GList *files)
 {
-	NautilusImageResizer *resizer = nautilus_image_resizer_new (image_converter_filter_images (files));
-	nautilus_image_resizer_show_dialog (resizer);
+	GList *images = image_converter_filter_images (files);
+
+	images = g_list_reverse (images);  /* keep the selection order */
+	ic_dialog_show (images);
+	g_list_free (images);
 }
 
 static void
-image_rotate_callback (NautilusMenuItem *item,
-			GList *files)
+free_file_list (gpointer data, GClosure *closure)
 {
-	NautilusImageRotator *rotator = nautilus_image_rotator_new (image_converter_filter_images (files));
-	nautilus_image_rotator_show_dialog (rotator);
-}
-
-static void
-image_format_changer_callback (NautilusMenuItem *item,
-			       GList *files)
-{
-	NautilusImageFormatChanger *changer = nautilus_image_format_changer_new (image_converter_filter_images (files));
-	nautilus_image_format_changer_show_dialog (changer);
+	nautilus_file_info_list_free (data);
 }
 
 GList *
@@ -109,46 +100,22 @@ nautilus_image_converter_get_file_items (NautilusMenuProvider *provider,
 {
 	NautilusMenuItem *item;
 	GList *file;
-	GList *items = NULL;
-	
+
 	for (file = files; file != NULL; file = file->next) {
 		if (image_converter_file_is_image (file->data)) {
-			item = nautilus_menu_item_new ("NautilusImageConverter::resize",
-				        _("_Resize Images..."),
-				        _("Resize each selected image"),
-				       "stock_position-size");
-			g_signal_connect (item, "activate",
-					  G_CALLBACK (image_resize_callback),
-					  nautilus_file_info_list_copy (files));
-					
-			items = g_list_prepend (items, item);
-
-			item = nautilus_menu_item_new ("NautilusImageConverter::rotate",
-				        _("Ro_tate Images..."),
-				        _("Rotate each selected image"),
-				       "stock_rotate");
-			g_signal_connect (item, "activate",
-					  G_CALLBACK (image_rotate_callback),
-					  nautilus_file_info_list_copy (files));
-
-			items = g_list_prepend (items, item);
-
-			item = nautilus_menu_item_new ("NautilusImageConverter::format",
-				        _("Convert _Format..."),
-				        _("Convert format of each selected image"),
+			item = nautilus_menu_item_new ("NautilusImageConverter::convert",
+				        _("Resize/convert image…"),
+				        _("Resize, compress, crop, rotate or convert the selected images"),
 				       "image-x-generic");
-			g_signal_connect (item, "activate",
-					  G_CALLBACK (image_format_changer_callback),
-					  nautilus_file_info_list_copy (files));
+			g_signal_connect_data (item, "activate",
+					       G_CALLBACK (image_convert_callback),
+					       nautilus_file_info_list_copy (files),
+					       free_file_list, 0);
 
-			items = g_list_prepend (items, item);
-			
-			items = g_list_reverse (items);
-
-			return items;
+			return g_list_append (NULL, item);
 		}
 	}
-	
+
 	return NULL;
 }
 

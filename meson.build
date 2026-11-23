@@ -33,6 +33,5 @@ config_file = configure_file(
 
 include_dir = include_directories('.')
 
-subdir('data')
 subdir('po')
 subdir('src')
