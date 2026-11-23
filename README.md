@@ -4,27 +4,19 @@ The **Nautilus-Image-Converter** extension allows you to resize, rotate, and con
 
 This repository is an enhanced fork of the original extension, featuring new improvements to make image manipulation even easier for modern workflows.
 
-## ✨ New in this Fork
+## ✨ Features
 
-* **🔄 Convert Image Format:** Convert images between **WebP, PNG, JPEG, AVIF, GIF, and PDF** formats with a single right-click. Optionally append a suffix to the new filename or delete the original after conversion.
-* **📄 Combine to PDF:** Easily select multiple images and combine them into a single, smartly-named PDF document (`image1_to_image3.pdf`).
-* **📦 Target File Size Compression/Upscaling:** Adjust images to match a specific target file size (e.g., 500KB, 2MB). Compresses larger files down by adjusting quality only (resolution is never downscaled), and optionally pads smaller files up with dummy bytes to hit the exact target — perfect for web uploads, email attachments, or portals with strict size limits. Uses `jpegoptim` for JPEG and `pngquant` for PNG when available, with ImageMagick as a fallback.
-* **📏 SI-Aligned Size Units:** Target size units use decimal base-1000 (KB/MB), matching GNOME/Nautilus file size display conventions.
-* **🎨 Modern GTK4 Widgets:** All dropdowns upgraded from legacy `GtkComboBoxText` to native `GtkDropDown`, fixing focus-stealing issues and aligning with modern GTK4 design.
+Right-click one or more images and choose **Resize/convert image…**. A single window lets you:
 
-## Core Features (from Original Project)
+* **🗂️ Use profiles:** pick a ready-made profile — *Web* (WebP, fit in 1280×960), *Email*, *Social media*, *Thumbnail*, *Under 1 MB*, *Lossless PNG* — or tweak the settings and save them back to the profile, or as a new one. Profiles are stored in `~/.config/nautilus-image-converter/profiles.ini`.
+* **📏 Resize:** keep the original size, scale by a percentage, fit within a box (optionally never enlarging), or force an exact size.
+* **🔄 Convert & compress:** keep the format or convert to **JPEG, PNG, WebP, AVIF, GIF or PDF**, set the quality, strip metadata, and optionally cap the file size (JPEG and WebP).
+* **✂️ Crop & rotate visually:** drag a crop rectangle (free or locked to a ratio), rotate by 90°, flip, and straighten with a slider. Straightening automatically crops away the empty corners.
+* **👁️ Live preview:** see the actual result — dimensions, file size and the change compared with the original — before converting anything. Switch to *Actual size* to inspect compression artefacts.
+* **📄 Combine to PDF:** select several images and combine them into a single PDF (`image1_to_image3.pdf`).
+* **💾 Output:** write a new file with a suffix (e.g. `photo-web.webp`), or replace the original. When the format changes, the original is moved to the trash.
 
-All the original features of the `nautilus-image-converter` are fully intact:
-
-* **Resize by Scale:** Scale images by a percentage (e.g., 50%).
-* **Resize by Custom Size:** Set a specific pixel width and height.
-* **Rotate Images:** Rotate 90°, 180°, or by a custom angle.
-* **In-Place or New File:** Choose to overwrite your original images or create new copies (e.g., `image.resized.jpg`).
-
-<img src="images/SS3.png" width="29%"> <img src="images/SS1.png" width="69%">
-<br/>
-<img src="images/SS2.png" width="49%"> <img src="images/SS4.png" width="49%">
-
+With several images selected, you can browse through them in the preview; the crop and rotation apply to all of them (the crop is relative to each image's size).
 
 ## 📥 Installation
 
@@ -32,7 +24,7 @@ To build and install the extension from source, run the following commands:
 
 ```bash
 # 1. Install dependencies (Ubuntu/Debian example)
-sudo apt install libgtk-4-dev libnautilus-extension4 libnautilus-extension-dev gettext jpegoptim meson ninja-build imagemagick pngquant
+sudo apt install libgtk-4-dev libnautilus-extension4 libnautilus-extension-dev gettext meson ninja-build imagemagick
 
 # 2. Clone this repository
 git clone https://github.com/Ameen-Sha-Cheerangan/nautilus-image-converter-gnome43plus.git
