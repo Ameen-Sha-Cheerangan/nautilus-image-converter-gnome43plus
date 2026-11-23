@@ -92,6 +92,8 @@ typedef struct {
 	GtkWidget *wh_row_label, *wh_box, *width_spin, *height_spin;
 	GtkWidget *preset_label, *preset_dd;
 	int        preset_w, preset_h;   /* size the preset menu was last matched against */
+	GtkWidget *ratio_lock;
+	double     lock_ratio;           /* width / height kept while the lock is on */
 	GtkWidget *noup_check;
 	GtkWidget *format_dd;
 	GtkWidget *quality_label, *quality_scale;
@@ -742,6 +744,20 @@ preset_cb (GObject *o, GParamSpec *pspec, IcDialog *d)
 	settings_changed (d);
 }
 
+static void save_profiles (IcDialog *d);
+
+static void
+ratio_lock_cb (GtkToggleButton *t, IcDialog *d)
+{
+	gboolean on = gtk_toggle_button_get_active (t);
+
+	gtk_button_set_icon_name (GTK_BUTTON (t), on ? "changes-prevent-symbolic" : "changes-allow-symbolic");
+	if (d->s.width > 0 && d->s.height > 0)
+		d->lock_ratio = (double) d->s.width / d->s.height;
+	if (!d->updating)
+		save_profiles (d);
+}
+
 static void
 swap_size_cb (GtkButton *b, IcDialog *d)
 {
@@ -817,21 +833,52 @@ settings_to_widgets (IcDialog *d, const IcSettings *s)
 	d->updating = FALSE;
 
 	settings_from_widgets (d);
+	if (d->s.width > 0 && d->s.height > 0)
+		d->lock_ratio = (double) d->s.width / d->s.height;
 }
 
 static void
 settings_changed (IcDialog *d)
 {
 	IcSettings old = { 0 };
+	gboolean ratio_kept = FALSE;
 
 	if (d->updating)
 		return;
 
 	ic_settings_copy_into (&old, &d->s);
 	settings_from_widgets (d);
+
+	if (old.width != d->s.width || old.height != d->s.height) {
+		gboolean locked = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (d->ratio_lock));
+
+		if (locked && d->lock_ratio > 0 && old.height == d->s.height) {
+			/* width edited: height follows */
+			d->s.height = CLAMP ((int) round (d->s.width / d->lock_ratio), 1, 100000);
+			ratio_kept = TRUE;
+			d->updating = TRUE;
+			gtk_spin_button_set_value (GTK_SPIN_BUTTON (d->height_spin), d->s.height);
+			d->updating = FALSE;
+		} else if (locked && d->lock_ratio > 0 && old.width == d->s.width) {
+			/* height edited: width follows */
+			d->s.width = CLAMP ((int) round (d->s.height * d->lock_ratio), 1, 100000);
+			ratio_kept = TRUE;
+			d->updating = TRUE;
+			gtk_spin_button_set_value (GTK_SPIN_BUTTON (d->width_spin), d->s.width);
+			d->updating = FALSE;
+		} else if (d->s.width > 0 && d->s.height > 0) {
+			/* both changed (preset, swap) or unlocked: new reference ratio */
+			d->lock_ratio = (double) d->s.width / d->s.height;
+		}
+	}
 	update_sensitivity (d);
 
-	if ((size_linked (d) && (old.width != d->s.width || old.height != d->s.height)) ||
+	if (ratio_kept ||
+	    (old.width > 0 && old.height > 0 &&
+	     fabs ((double) d->s.width / d->s.height - (double) old.width / old.height) <
+	     0.002 * ((double) old.width / old.height))) {
+		/* same shape, just bigger or smaller: leave the crop box alone */
+	} else if ((size_linked (d) && (old.width != d->s.width || old.height != d->s.height)) ||
 	    (d->s.resize == IC_RESIZE_EXACT && old.resize != d->s.resize)) {
 		/* typed / picked an output size: the crop box takes its shape */
 		fit_crop_to_output (d);
@@ -907,7 +954,8 @@ static void
 save_profiles (IcDialog *d)
 {
 	IcProfile *p = current_profile (d);
-	ic_profiles_save (d->profiles, p ? p->name : NULL);
+	ic_profiles_save (d->profiles, p ? p->name : NULL,
+	                  gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (d->ratio_lock)));
 }
 
 static void
@@ -1048,6 +1096,7 @@ sync_output_from_crop (IcDialog *d)
 	d->updating = FALSE;
 	d->s.width = w;
 	d->s.height = h;
+	d->lock_ratio = (double) w / h;
 	update_sensitivity (d);
 }
 
@@ -1800,8 +1849,14 @@ build_sidebar (IcDialog *d)
 	d->height_spin = gtk_spin_button_new_with_range (1, 100000, 10);
 	gtk_widget_set_hexpand (d->width_spin, TRUE);
 	gtk_widget_set_hexpand (d->height_spin, TRUE);
+	d->ratio_lock = gtk_toggle_button_new ();
+	gtk_button_set_icon_name (GTK_BUTTON (d->ratio_lock), "changes-allow-symbolic");
+	gtk_widget_set_tooltip_text (d->ratio_lock, _("Keep the aspect ratio"));
+	gtk_widget_add_css_class (d->ratio_lock, "flat");
+	gtk_widget_set_valign (d->ratio_lock, GTK_ALIGN_CENTER);
+	g_signal_connect (d->ratio_lock, "toggled", G_CALLBACK (ratio_lock_cb), d);
 	gtk_box_append (GTK_BOX (d->wh_box), d->width_spin);
-	gtk_box_append (GTK_BOX (d->wh_box), gtk_label_new ("×"));
+	gtk_box_append (GTK_BOX (d->wh_box), d->ratio_lock);
 	gtk_box_append (GTK_BOX (d->wh_box), d->height_spin);
 	{
 		GtkWidget *swap = icon_button ("object-rotate-right-symbolic", _("Swap width and height"));
@@ -2136,6 +2191,7 @@ ic_dialog_show (GList *files)
 {
 	IcDialog *d;
 	g_autofree char *last = NULL;
+	gboolean keep_ratio = FALSE;
 	guint profile_idx = 0;
 
 	if (files == NULL)
@@ -2168,12 +2224,15 @@ ic_dialog_show (GList *files)
 		return;
 	}
 
-	d->profiles = ic_profiles_load (&last);
+	d->profiles = ic_profiles_load (&last, &keep_ratio);
 	for (guint i = 0; last && i < d->profiles->len; i++)
 		if (g_strcmp0 (((IcProfile *) g_ptr_array_index (d->profiles, i))->name, last) == 0)
 			profile_idx = i;
 
 	build_window (d);
+	d->updating = TRUE;
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (d->ratio_lock), keep_ratio);
+	d->updating = FALSE;
 	d->profile_idx = profile_idx;
 	rebuild_profile_model (d);
 	select_profile (d, profile_idx);

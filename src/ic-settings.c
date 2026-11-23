@@ -292,7 +292,7 @@ kf_bool (GKeyFile *kf, const char *group, const char *key, gboolean fallback)
 }
 
 GPtrArray *
-ic_profiles_load (char **last_used)
+ic_profiles_load (char **last_used, gboolean *keep_ratio)
 {
 	g_autofree char *path = profiles_path ();
 	g_autoptr (GKeyFile) kf = g_key_file_new ();
@@ -301,6 +301,8 @@ ic_profiles_load (char **last_used)
 
 	if (last_used)
 		*last_used = NULL;
+	if (keep_ratio)
+		*keep_ratio = FALSE;
 
 	if (!g_key_file_load_from_file (kf, path, G_KEY_FILE_NONE, NULL))
 		return ic_profiles_defaults ();
@@ -339,6 +341,8 @@ ic_profiles_load (char **last_used)
 
 	if (last_used)
 		*last_used = g_key_file_get_string (kf, "General", "last-profile", NULL);
+	if (keep_ratio)
+		*keep_ratio = kf_bool (kf, "General", "keep-ratio", FALSE);
 
 	if (arr->len == 0) {
 		g_ptr_array_unref (arr);
@@ -348,7 +352,7 @@ ic_profiles_load (char **last_used)
 }
 
 void
-ic_profiles_save (GPtrArray *profiles, const char *last_used)
+ic_profiles_save (GPtrArray *profiles, const char *last_used, gboolean keep_ratio)
 {
 	g_autofree char *path = profiles_path ();
 	g_autofree char *dir = g_path_get_dirname (path);
@@ -357,6 +361,7 @@ ic_profiles_save (GPtrArray *profiles, const char *last_used)
 
 	if (last_used)
 		g_key_file_set_string (kf, "General", "last-profile", last_used);
+	g_key_file_set_boolean (kf, "General", "keep-ratio", keep_ratio);
 
 	for (guint i = 0; i < profiles->len; i++) {
 		IcProfile *p = g_ptr_array_index (profiles, i);

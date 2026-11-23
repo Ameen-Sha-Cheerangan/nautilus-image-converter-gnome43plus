@@ -97,8 +97,9 @@ char       *ic_path_extension       (const char *path);
 char       *ic_output_extension     (const IcSettings *s, const char *src_path);
 
 /* Profiles */
-GPtrArray  *ic_profiles_load        (char **last_used);   /* of IcProfile* */
-void        ic_profiles_save        (GPtrArray *profiles, const char *last_used);
+/* last_used / keep_ratio: UI state stored alongside the profiles (may be NULL) */
+GPtrArray  *ic_profiles_load        (char **last_used, gboolean *keep_ratio);   /* of IcProfile* */
+void        ic_profiles_save        (GPtrArray *profiles, const char *last_used, gboolean keep_ratio);
 GPtrArray  *ic_profiles_defaults    (void);
 IcProfile  *ic_profile_new          (const char *name, const IcSettings *s);
 void        ic_profile_free         (IcProfile *p);
